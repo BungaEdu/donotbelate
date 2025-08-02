@@ -11,17 +11,12 @@ import com.example.donotbelate_v3.presentation.components.NumberPickerComposable
 
 @Composable
 fun DuranteScreen(navController: NavController) {
-    // ViewModel (comentado)
-    // val viewModel: DuranteViewModel = koinViewModel()
-    // val tiempoRestante by viewModel.tiempoRestante.collectAsState()
-
     val avisar = navController.currentBackStackEntry
-        ?.arguments?.getString("avisar")?.toIntOrNull() ?: 3
+        ?.arguments?.getString("avisar")?.toIntOrNull() ?: 0
     val minuto = navController.currentBackStackEntry
-        ?.arguments?.getString("minuto")?.toIntOrNull() ?: 30
+        ?.arguments?.getString("minuto")?.toIntOrNull() ?: 0
 
-    // States internos (puedes moverlos al ViewModel luego)
-    var minutoSeleccionado by remember { mutableIntStateOf(minuto) }
+    var duranteMin by remember { mutableIntStateOf(minuto) }
     var avisarCada by remember { mutableIntStateOf(avisar) }
 
     Column(
@@ -41,7 +36,7 @@ fun DuranteScreen(navController: NavController) {
                 onValueChange = { avisarCada = it },
                 range = 1..59
             )
-            Text("seg", style = MaterialTheme.typography.headlineMedium)
+            Text("min", style = MaterialTheme.typography.headlineMedium)
         }
 
         Row(
@@ -50,19 +45,17 @@ fun DuranteScreen(navController: NavController) {
         ) {
             Text("Durante", style = MaterialTheme.typography.headlineMedium)
             NumberPickerComposable(
-                value = minutoSeleccionado,
-                onValueChange = { minutoSeleccionado = it },
-                range = 0..59
+                value = duranteMin,
+                onValueChange = { duranteMin = it },
+                range = 1..59
             )
             Text("min", style = MaterialTheme.typography.headlineMedium)
         }
 
-        // tiempoRestante podría ir aquí como Text dinámico
-
         Button(
             onClick = {
                 navController.navigate(
-                    "durante_running_screen/$avisarCada/${minutoSeleccionado * 60}"
+                    "durante_running_screen/$avisarCada/${duranteMin}"
                 )
             },
             modifier = Modifier.fillMaxWidth()

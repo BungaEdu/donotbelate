@@ -16,6 +16,7 @@ fun NumberPickerComposable(
                 minValue = range.first
                 maxValue = range.last
                 this.value = value
+                descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
                 setOnValueChangedListener { _, _, newVal ->
                     onValueChange(newVal)
                 }

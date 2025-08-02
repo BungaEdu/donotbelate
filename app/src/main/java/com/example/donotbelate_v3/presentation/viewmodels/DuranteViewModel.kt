@@ -1,4 +1,4 @@
-package com.example.donotbelate_v3.presentation.viewmodels
+package com.example.donotbelate_v2.presentation.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -11,24 +11,25 @@ import kotlinx.coroutines.launch
 
 class DuranteViewModel : ViewModel() {
 
-    private val _tiempoRestante = MutableStateFlow(0)
+    private val _tiempoRestante = MutableStateFlow(0) // en minutos
     val tiempoRestante: StateFlow<Int> = _tiempoRestante
 
     private var timerJob: Job? = null
 
-    fun startTimer(duracionSegundos: Int, avisarCada: Int) {
-        stopTimer() // Por si había uno previo
+    fun startTimer(duracionMinutos: Int, avisarCadaMinutos: Int) {
+        stopTimer()
 
         timerJob = viewModelScope.launch {
-            for (i in duracionSegundos downTo 0) {
+            for (i in duracionMinutos downTo 0) {
                 _tiempoRestante.value = i
 
-                if (i > 0 && i % avisarCada == 0) {
-                    Log.d("DuranteTimer", "Quedan $i segundos")
+                if (i > 0 && i % avisarCadaMinutos == 0) {
+                    Log.d("DuranteTimer", "Quedan $i minutos")
                 }
 
-                delay(1_000)
+                delay(60_000) // espera 1 minuto
             }
+
             Log.d("DuranteTimer", "Se ha terminado el tiempo, no llegues tarde")
         }
     }

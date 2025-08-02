@@ -3,16 +3,12 @@ package com.example.donotbelate_v3.presentation.screens
 import BottomNavigationBar
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.donotbelate_v2.presentation.components.TopBar
-import com.example.donotbelate_v2.presentation.screens.DuranteScreen
-import com.example.donotbelate_v2.presentation.screens.HastaScreen
+import com.example.donotbelate_v3.navigation.SetupNavGraph
 
 @Composable
 fun MainScreen() {
@@ -20,7 +16,11 @@ fun MainScreen() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val showTopBar = currentRoute !in listOf(Screen.Settings.route)
+    val showTopBar = currentRoute !in listOf(
+        Screen.Settings.route,
+        Screen.DuranteRunning.routeWithArgs
+    )
+
     val showBottomBar = currentRoute in listOf(
         Screen.Durante.route,
         Screen.Hasta.route,
@@ -29,27 +29,12 @@ fun MainScreen() {
 
     Scaffold(
         topBar = {
-            if (showTopBar) {
-                TopBar()
-            }
+            if (showTopBar) TopBar()
         },
         bottomBar = {
-            if (showBottomBar) {
-                BottomNavigationBar(navController = navController)
-            }
+            if (showBottomBar) BottomNavigationBar(navController = navController)
         }
     ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            //startDestination = Screen.Durante.route,
-            //startDestination = Screen.Profile.route,
-            startDestination = Screen.Durante.route,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable(Screen.Durante.route) { DuranteScreen(navController) }
-            composable(Screen.Hasta.route) { HastaScreen(navController) }
-            composable(Screen.Profile.route) { ProfileScreen(navController) }
-            composable(Screen.Settings.route) { SettingsScreen(navController) }
-        }
+        SetupNavGraph(navController = navController, modifier = Modifier.padding(innerPadding))
     }
 }

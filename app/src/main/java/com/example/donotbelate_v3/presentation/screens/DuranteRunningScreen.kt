@@ -1,7 +1,5 @@
 package com.example.donotbelate_v3.presentation.screens
 
-import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,10 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.donotbelate_v3.presentation.viewmodels.DuranteViewModel
+import com.example.donotbelate_v2.presentation.viewmodels.DuranteViewModel
+import com.example.donotbelate_v3.ui.theme.GalanoGrotesque
 
 @Composable
 fun DuranteRunningScreen(
@@ -59,20 +60,32 @@ fun DuranteRunningScreen(
             )
         }
 
+        Text(
+            text = "Quedan",
+            color = Color(0xFF181C3B),
+            fontFamily = FontFamily.Default,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 144.dp),
+        )
+
         // Texto grande de cuenta atrás
         Text(
-            text = tiempoRestante.toString(),
-            style = MaterialTheme.typography.displayLarge,
+            text = tiempoRestante.toString(), // muestra minutos restantes
+            fontFamily = GalanoGrotesque,
+            fontSize = 280.sp,
             color = Color(0xFFEAB916),
-            modifier = Modifier.align(Alignment.Center)
+            modifier = Modifier.align(Alignment.Center),
+            lineHeight = 280.sp
         )
 
         Text(
-            text = "Te avisaré cada $avisarCada segundos durante $durante segundos",
+            text = "Te avisaré cada $avisarCada minutos durante $durante minutos",
             color = Color(0xFF181C3B),
+            fontFamily = FontFamily.Default,
             modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 144.dp)
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 144.dp),
         )
     }
 }
