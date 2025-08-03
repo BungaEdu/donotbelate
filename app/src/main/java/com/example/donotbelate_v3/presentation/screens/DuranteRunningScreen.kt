@@ -16,21 +16,33 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.donotbelate_v2.presentation.viewmodels.DuranteViewModel
+import com.example.donotbelate_v3.logic.TimerStopper
+import com.example.donotbelate_v3.presentation.viewmodels.DuranteViewModel
 import com.example.donotbelate_v3.ui.theme.GalanoGrotesque
 
 @Composable
 fun DuranteRunningScreen(
     navController: NavController,
-    avisarCada: Int,
-    durante: Int,
+    avisarCadaMin: Int,
+    duranteMin: Int,
     viewModel: DuranteViewModel = viewModel()
 ) {
     val tiempoRestante by viewModel.tiempoRestante.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        viewModel.startTimer(durante, avisarCada)
+        TimerStopper.registerStopCallback {
+            viewModel.stopTimer()
+            navController.popBackStack()
+        }
+
+        viewModel.startTimer(context, duranteMin, avisarCadaMin)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            TimerStopper.reset()
+        }
     }
 
     BackHandler {
@@ -61,12 +73,12 @@ fun DuranteRunningScreen(
         }
 
         Text(
-            text = "Quedan",
+            text = "Quedan", style = MaterialTheme.typography.headlineLarge,
             color = Color(0xFF181C3B),
             fontFamily = FontFamily.Default,
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 144.dp),
+                .align(Alignment.TopCenter)
+                .padding(top = 144.dp),
         )
 
         // Texto grande de cuenta atrás
@@ -80,7 +92,7 @@ fun DuranteRunningScreen(
         )
 
         Text(
-            text = "Te avisaré cada $avisarCada minutos durante $durante minutos",
+            text = "Te avisaré cada $avisarCadaMin minutos durante $duranteMin minutos",
             color = Color(0xFF181C3B),
             fontFamily = FontFamily.Default,
             modifier = Modifier

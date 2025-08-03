@@ -1,4 +1,4 @@
-package com.example.donotbelate_v2.presentation.screens
+package com.example.donotbelate_v3.presentation.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -30,9 +30,10 @@ fun DuranteScreen(navController: NavController) {
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            //TODO dejo el value estatico para pruebas, luego hay que mejorarlo
             Text("Avisar cada", style = MaterialTheme.typography.headlineMedium)
             NumberPickerComposable(
-                value = avisarCada,
+                value = 1,
                 onValueChange = { avisarCada = it },
                 range = 1..59
             )
@@ -45,7 +46,8 @@ fun DuranteScreen(navController: NavController) {
         ) {
             Text("Durante", style = MaterialTheme.typography.headlineMedium)
             NumberPickerComposable(
-                value = duranteMin,
+                //TODO dejo el value estatico para pruebas, luego hay que mejorarlo
+                value = 3,
                 onValueChange = { duranteMin = it },
                 range = 1..59
             )

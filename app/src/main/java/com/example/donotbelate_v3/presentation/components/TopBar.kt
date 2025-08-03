@@ -1,9 +1,8 @@
-package com.example.donotbelate_v2.presentation.components
+package com.example.donotbelate_v3.presentation.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,16 +12,15 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.donotbelate_v3.ui.theme.Purple40
 import com.example.donotbelate_v3.ui.theme.White
 import com.example.donotbelate_v3.R
 
+//TODO verificar el warning que no tiene sentido
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
 fun TopBar() {
     TopAppBar(

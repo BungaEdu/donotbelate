@@ -1,4 +1,4 @@
-package com.example.donotbelate_v2.presentation.screens
+package com.example.donotbelate_v3.presentation.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -53,13 +53,15 @@ fun HastaScreen(navController: NavController) {
         ) {
             Text("Hasta las", style = MaterialTheme.typography.headlineMedium)
             NumberPickerComposable(
-                value = horaSeleccionada,
+                //TODO dejo el value estatico para pruebas, luego hay que mejorarlo
+                value = 1,
                 onValueChange = { horaSeleccionada = it },
                 range = 0..23
             )
             Text(":")
             NumberPickerComposable(
-                value = minutoSeleccionado,
+                //TODO dejo el value estatico para pruebas, luego hay que mejorarlo
+                value = 3,
                 onValueChange = { minutoSeleccionado = it },
                 range = 0..59
             )

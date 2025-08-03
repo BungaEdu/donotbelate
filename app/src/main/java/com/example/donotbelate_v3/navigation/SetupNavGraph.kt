@@ -7,7 +7,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.donotbelate_v2.presentation.screens.*
 import com.example.donotbelate_v3.presentation.screens.*
 
 @Composable
@@ -37,8 +36,8 @@ fun SetupNavGraph(
 
             DuranteRunningScreen(
                 navController = navController,
-                avisarCada = avisarCada,
-                durante = durante
+                avisarCadaMin = avisarCada,
+                duranteMin = durante
             )
         }
     }
