@@ -4,14 +4,20 @@ import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.donotbelate_v3.logic.NotificationHelper
+import com.example.donotbelate_v3.logic.TtsManager
 import kotlinx.coroutines.*
+import org.koin.android.ext.android.inject
 
 class DuranteService : Service() {
     private val TAG = "*DuranteService"
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var timerJob: Job? = null
+
+    // ✅ Inyección de TtsManager con Koin
+    private val ttsManager: TtsManager by inject()
 
     @SuppressLint("ForegroundServiceType") //TODO revisar si necesito algo para quitar el supress
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -37,7 +43,7 @@ class DuranteService : Service() {
         timerJob?.cancel()
         timerJob = serviceScope.launch {
             for (minutos in duranteMin downTo 0) {
-                // 🔊 Emitir evento con minutos restantes
+                // 🔁 Emitir evento con minutos restantes
                 val intent = Intent("TIEMPO_RESTANTE_UPDATE").apply {
                     putExtra("minutosRestantes", minutos)
                 }
@@ -50,17 +56,32 @@ class DuranteService : Service() {
                         content = "Te quedan $minutos minutos",
                         isOngoing = true
                     )
+
+                    if (ttsManager.isReady()) {
+                        ttsManager.speak("Te quedan $minutos minutos")
+                    } else {
+                        Log.w(TAG, "TTS no inicializado todavía (avisar $minutos)")
+                    }
+                }
+
+                // ✅ Solo cuando llega a 0
+                if (minutos == 0) {
+                    NotificationHelper.updateNotification(
+                        context = this@DuranteService,
+                        title = "Temporizador finalizado",
+                        content = "Se ha acabado el tiempo, no llegues tarde",
+                        isOngoing = false
+                    )
+
+                    if (ttsManager.isReady()) {
+                        ttsManager.speak("Se ha acabado el tiempo, no llegues tarde")
+                    } else {
+                        Log.w(TAG, "TTS no inicializado todavía (final)")
+                    }
                 }
 
                 delay(60_000)
             }
-
-            NotificationHelper.updateNotification(
-                context = this@DuranteService,
-                title = "Temporizador finalizado",
-                content = "Se ha acabado el tiempo, no llegues tarde",
-                isOngoing = false
-            )
 
             stopSelf()
         }
