@@ -1,5 +1,6 @@
 package com.example.donotbelate_v3.presentation.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,6 +12,7 @@ import com.example.donotbelate_v3.presentation.components.NumberPickerComposable
 
 @Composable
 fun DuranteScreen(navController: NavController) {
+    val TAG = "*DuranteScreen"
     val avisar = navController.currentBackStackEntry
         ?.arguments?.getString("avisar")?.toIntOrNull() ?: 0
     val minuto = navController.currentBackStackEntry
@@ -33,7 +35,7 @@ fun DuranteScreen(navController: NavController) {
             //TODO dejo el value estatico para pruebas, luego hay que mejorarlo
             Text("Avisar cada", style = MaterialTheme.typography.headlineMedium)
             NumberPickerComposable(
-                value = 1,
+                value = avisarCada,
                 onValueChange = { avisarCada = it },
                 range = 1..59
             )
@@ -47,7 +49,7 @@ fun DuranteScreen(navController: NavController) {
             Text("Durante", style = MaterialTheme.typography.headlineMedium)
             NumberPickerComposable(
                 //TODO dejo el value estatico para pruebas, luego hay que mejorarlo
-                value = 3,
+                value = avisarCada,
                 onValueChange = { duranteMin = it },
                 range = 1..59
             )
@@ -59,6 +61,7 @@ fun DuranteScreen(navController: NavController) {
                 navController.navigate(
                     "durante_running_screen/$avisarCada/${duranteMin}"
                 )
+                Log.d(TAG, "From DuranteScreen to DuranteRunningScreen: avisarCada=$avisarCada, durante=$duranteMin")
             },
             modifier = Modifier.fillMaxWidth()
         ) {

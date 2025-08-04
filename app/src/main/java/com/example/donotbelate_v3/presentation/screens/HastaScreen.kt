@@ -11,10 +11,7 @@ import com.example.donotbelate_v3.presentation.components.NumberPickerComposable
 
 @Composable
 fun HastaScreen(navController: NavController) {
-    // ViewModel (comentado)
-    // val viewModel: HastaViewModel = koinViewModel()
-    // val tiempoRestante by viewModel.tiempoRestante.collectAsState()
-
+    val TAG = "*HastaScreen"
     val hora = navController.currentBackStackEntry
         ?.arguments?.getString("hora")?.toIntOrNull() ?: 14
     val minuto = navController.currentBackStackEntry

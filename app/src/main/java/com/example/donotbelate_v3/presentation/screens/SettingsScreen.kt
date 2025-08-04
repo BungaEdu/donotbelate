@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 
 @Composable
 fun SettingsScreen(navController: NavController) {
+    val TAG = "*SettingsScreen"
     Column(
         modifier = Modifier
             .fillMaxSize()

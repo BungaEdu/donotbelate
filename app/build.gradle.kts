@@ -47,6 +47,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0") // solo necesaria si usas vistas tradicionales
     implementation("androidx.constraintlayout:constraintlayout:2.1.4") // solo si usas XML
+    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
 
     // Compose BOM: gestiona versiones compatibles automáticamente
     implementation(platform("androidx.compose:compose-bom:2024.05.00"))

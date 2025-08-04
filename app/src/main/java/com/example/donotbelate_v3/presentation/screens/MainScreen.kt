@@ -12,6 +12,7 @@ import com.example.donotbelate_v3.navigation.SetupNavGraph
 
 @Composable
 fun MainScreen() {
+    val TAG = "*MainScreen"
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route

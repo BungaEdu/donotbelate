@@ -1,6 +1,7 @@
 package com.example.donotbelate_v3.logic
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -12,83 +13,120 @@ import androidx.core.app.NotificationManagerCompat
 import com.example.donotbelate_v3.MainActivity
 import com.example.donotbelate_v3.R
 
-@SuppressLint("MissingPermission")//TODO hayq ue pedir permiso notificaciones
+@SuppressLint("MissingPermission") // Recuerda pedir el permiso de notificaciones en Android 13+
 object NotificationHelper {
 
     private const val CHANNEL_ID = "durante_timer_channel"
+    private const val CHANNEL_NAME = "Durante Timer"
+    private const val CHANNEL_DESCRIPTION = "Avisos periódicos del temporizador"
+    private const val TIMER_NOTIFICATION_ID = 100
 
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Durante Timer"
-            val descriptionText = "Avisos periódicos del temporizador"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = CHANNEL_DESCRIPTION
             }
 
-            val notificationManager: NotificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-            notificationManager.createNotificationChannel(channel)
+            val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.createNotificationChannel(channel)
         }
     }
 
+    /**
+     * Construye y envía una notificación (la muestra si no existe, o la actualiza si ya está activa).
+     */
     fun sendNotification(
         context: Context,
         title: String,
         content: String,
-        isPersistent: Boolean = true, // ⛔ por defecto no deslizable
-        id: Int = 100
+        isPersistent: Boolean = true // ⛔ no deslizable si es true
     ) {
-        // Intent para abrir la app (MainActivity)
+        val notification = buildNotification(context, title, content, isPersistent)
+        NotificationManagerCompat.from(context).notify(TIMER_NOTIFICATION_ID, notification)
+    }
+
+    /**
+     * Construye la notificación que se usará en segundo plano (para startForeground).
+     */
+    fun buildForegroundNotification(
+        context: Context,
+        title: String,
+        content: String
+    ): Notification = buildNotification(
+        context = context,
+        title = title,
+        content = content,
+        isOngoing = true
+    )
+
+    /**
+     * Construye una notificación completa con botón para cancelar (detener el temporizador).
+     */
+    private fun buildNotification(
+        context: Context,
+        title: String,
+        content: String,
+        isOngoing: Boolean
+    ): Notification {
+        // Abrir la app al tocar la notificación
         val openIntent = Intent(context, MainActivity::class.java)
         val openPendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            openIntent,
+            context, 0, openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Intent para detener el timer desde la notificación (❌)
+        // Botón "Cancelar"
         val stopIntent = Intent(context, StopTimerReceiver::class.java)
         val stopPendingIntent = PendingIntent.getBroadcast(
-            context,
-            0,
-            stopIntent,
+            context, 0, stopIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+        return NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground) // Pon aquí tu icono real
             .setContentTitle(title)
             .setContentText(content)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setOngoing(isPersistent) // ← ¿se puede deslizar?
-            .setAutoCancel(!isPersistent) // ← si no es persistente, que se autocancele
+            .setOngoing(isOngoing)         // ← ¿se puede deslizar?
+            .setAutoCancel(!isOngoing)     // ← autocancel si no es persistente
             .setContentIntent(openPendingIntent)
             .addAction(R.drawable.ic_launcher_foreground, "Cancelar", stopPendingIntent)
-
-        with(NotificationManagerCompat.from(context)) {
-            notify(id, builder.build())
-        }
+            .build()
     }
 
+    /**
+     * Actualiza la notificación en cualquier momento (por ejemplo, "quedan X minutos").
+     */
+    fun updateNotification(
+        context: Context,
+        title: String,
+        content: String,
+        isOngoing: Boolean = true
+    ) {
+        val updated = buildNotification(context, title, content, isOngoing)
+        NotificationManagerCompat.from(context).notify(TIMER_NOTIFICATION_ID, updated)
+    }
 
+    /**
+     * Notificación de finalización del temporizador (usa el mismo ID para actualizar).
+     */
+    fun sendFinalNotification(context: Context) {
+        updateNotification(
+            context = context,
+            title = "Temporizador finalizado",
+            content = "Se ha acabado el tiempo, no llegues tarde",
+            isOngoing = false
+        )
+    }
 
-    /*fun sendFinalNotification(context: Context, id: Int = 999) {
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // o tu icono
-            .setContentTitle("Temporizador finalizado")
-            .setContentText("Se ha acabado el tiempo, no llegues tarde")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-
-        with(NotificationManagerCompat.from(context)) {
-            notify(id, builder.build())
-        }
-    }*/
-
+    /**
+     * Cancela todas las notificaciones activas (útil al detener el temporizador).
+     */
     fun cancelAll(context: Context) {
         NotificationManagerCompat.from(context).cancelAll()
     }
-
 }
