@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.donotbelate_v3"
+    namespace = "com.example.donotbelate"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.donotbelate_v3"
+        applicationId = "com.example.donotbelate"
         minSdk = 33
         targetSdk = 35
         versionCode = 1

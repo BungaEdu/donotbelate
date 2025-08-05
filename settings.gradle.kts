@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DoNotBeLate_v3"
+rootProject.name = "donotbelate"
 include(":app")
  
