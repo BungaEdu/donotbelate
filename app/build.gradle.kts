@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.donotbelate"
+    namespace = "com.bungaedu.donotbelate"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.donotbelate"
-        minSdk = 33
+        applicationId = "com.bungaedu.donotbelate"
+        minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -38,6 +38,25 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.12"
+    }
+    signingConfigs {
+        create("release") {
+            storeFile = file("upload-key.jks")
+            storePassword = "3Tristestigres."
+            keyAlias = "upload"
+            keyPassword = "3Tristestigres."
+        }
+    }
+
+    buildTypes {
+        named("release") {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
     }
 }
 
