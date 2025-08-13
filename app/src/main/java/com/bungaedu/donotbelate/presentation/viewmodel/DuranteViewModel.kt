@@ -1,4 +1,4 @@
-package com.bungaedu.donotbelate.presentation.viewmodels
+package com.bungaedu.donotbelate.presentation.viewmodel
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -14,9 +14,10 @@ import kotlinx.coroutines.flow.StateFlow
 private const val TAG = "*DuranteViewModel"
 
 class DuranteViewModel : ViewModel() {
+
     private val _tiempoRestante = MutableStateFlow(0) // En minutos
-    val tiempoRestante: StateFlow<Int> = _tiempoRestante
     private var timerJob: Job? = null
+    val tiempoRestante: StateFlow<Int> = _tiempoRestante
 
     /**
      * Detiene el temporizador y cancela la notificación.
@@ -35,11 +36,17 @@ class DuranteViewModel : ViewModel() {
         stopTimer()
     }
 
+    /**
+     * Se suscribe al broadcast local para recibir actualizaciones del tiempo restante.
+     */
     fun startListening(context: Context) {
         val filter = IntentFilter("TIEMPO_RESTANTE_UPDATE")
         LocalBroadcastManager.getInstance(context).registerReceiver(tiempoReceiver, filter)
     }
 
+    /**
+     * Cancela la suscripción al broadcast local.
+     */
     fun stopListening(context: Context) {
         LocalBroadcastManager.getInstance(context).unregisterReceiver(tiempoReceiver)
     }
@@ -50,5 +57,4 @@ class DuranteViewModel : ViewModel() {
             _tiempoRestante.value = minutos
         }
     }
-
 }

@@ -20,8 +20,8 @@ import androidx.navigation.NavController
 import com.bungaedu.donotbelate.service.DuranteService
 import com.bungaedu.donotbelate.logic.NotificationHelper
 import com.bungaedu.donotbelate.logic.TimerHolder
-import com.bungaedu.donotbelate.presentation.viewmodels.DuranteViewModel
 import com.bungaedu.donotbelate.presentation.theme.GalanoGrotesque
+import com.bungaedu.donotbelate.presentation.viewmodel.DuranteViewModel
 
 private const val TAG = "*DuranteRunningScreen"
 

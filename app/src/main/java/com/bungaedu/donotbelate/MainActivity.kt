@@ -1,5 +1,6 @@
 package com.bungaedu.donotbelate
 
+import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
 import android.util.Log
@@ -59,6 +60,16 @@ class MainActivity : ComponentActivity() {
                     e.printStackTrace()
                 }
             }
+        }
+    }
+
+    /**
+     * Si rechaza la actualización se cierra la app.
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_UPDATE && resultCode != RESULT_OK) {
+            finishAffinity()
         }
     }
 }

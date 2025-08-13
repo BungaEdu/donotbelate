@@ -31,7 +31,7 @@ fun TopBar() {
             ) {
                 // Imagen ocupa exactamente el 25% del ancho
                 Image(
-                    painter = painterResource(id = R.drawable.reloj),
+                    painter = painterResource(id = R.mipmap.ic_launcher_foreground),
                     contentDescription = "Icono de reloj",
                     modifier = Modifier
                         .weight(0.25f)
@@ -51,7 +51,8 @@ fun TopBar() {
                     val fontSize = remember(maxWidth) {
                         // Empezamos con un tamaño grande y vamos bajando hasta que quepa
                         var testSize = 20.sp
-                        val availableWidthPx = with(density) { (maxWidth - 16.dp).toPx() } // restamos padding
+                        val availableWidthPx =
+                            with(density) { (maxWidth - 16.dp).toPx() } // restamos padding
 
                         while (testSize.value > 8) { // mínimo 8sp
                             val textStyle = TextStyle(fontSize = testSize)

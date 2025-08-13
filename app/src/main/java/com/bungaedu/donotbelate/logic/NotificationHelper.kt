@@ -71,14 +71,14 @@ object NotificationHelper {
         )
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Pon aquí tu icono real
+            .setSmallIcon(R.mipmap.ic_launcher_foreground) // Pon aquí tu icono real
             .setContentTitle(title)
             .setContentText(content)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setOngoing(isOngoing)         // ← ¿se puede deslizar?
             .setAutoCancel(!isOngoing)     // ← autocancel si no es persistente
             .setContentIntent(openPendingIntent)
-            .addAction(R.drawable.ic_launcher_foreground, "Cancelar", stopPendingIntent)
+            .addAction(R.mipmap.ic_launcher_foreground, "Cancelar", stopPendingIntent)
             .build()
     }
 
