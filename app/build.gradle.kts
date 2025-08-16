@@ -11,7 +11,7 @@ android {
         applicationId = "com.bungaedu.donotbelate"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
+        versionCode = 4
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -96,4 +96,11 @@ dependencies {
 
     // Google
     implementation("com.google.android.play:app-update:2.1.0")
+
+    // DataStore Preferences (clave-valor)
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    // (opcional, pero recomendado) – para corrutinas
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 }

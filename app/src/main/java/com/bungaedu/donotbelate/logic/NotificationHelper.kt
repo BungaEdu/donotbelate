@@ -78,7 +78,7 @@ object NotificationHelper {
             .setOngoing(isOngoing)         // ← ¿se puede deslizar?
             .setAutoCancel(!isOngoing)     // ← autocancel si no es persistente
             .setContentIntent(openPendingIntent)
-            .addAction(R.mipmap.ic_launcher_foreground, "Cancelar", stopPendingIntent)
+            //.addAction(R.mipmap.ic_launcher_foreground, "Cancelar", stopPendingIntent)
             .build()
     }
 

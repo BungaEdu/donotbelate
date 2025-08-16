@@ -107,13 +107,13 @@ class TtsManager() {
 
         val builder = AudioAttributes.Builder()
         if (outputAlwaysPhone) {
-            Log.i("VER", "Estoy en outputAlwaysPhone TRUE")
+            Log.i(TAG, "Estoy en outputAlwaysPhone TRUE")
             builder.setUsage(AudioAttributes.USAGE_ALARM)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
                 .setLegacyStreamType(AudioManager.STREAM_ALARM)
         } else {
-            Log.i("VER", "Estoy en outputAlwaysPhone FALSE")
+            Log.i(TAG, "Estoy en outputAlwaysPhone FALSE")
             builder.setLegacyStreamType(AudioManager.STREAM_MUSIC)
         }
 

@@ -67,6 +67,7 @@ class DuranteService : Service() {
 
                 // ✅ Solo cuando llega a 0
                 if (minutos == 0) {
+                    stopForeground(false)
                     NotificationHelper.updateNotification(
                         context = this@DuranteService,
                         title = "Temporizador finalizado",
