@@ -7,13 +7,14 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.bungaedu.donotbelate.R
 
 @SuppressLint("MissingPermission") // Recuerda pedir el permiso de notificaciones en Android 13+
 object NotificationHelper {
-
+    private const val TAG = "*NotificationHelper"
     private const val CHANNEL_ID = "durante_timer_channel"
     private const val CHANNEL_NAME = "Durante Timer"
     private const val CHANNEL_DESCRIPTION = "Avisos periódicos del temporizador"
@@ -23,13 +24,14 @@ object NotificationHelper {
         val channel = NotificationChannel(
             CHANNEL_ID,
             CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_DEFAULT
+            NotificationManager.IMPORTANCE_HIGH
         ).apply {
             description = CHANNEL_DESCRIPTION
         }
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
+        Log.d(TAG, "Notificación creada")
     }
 
     /**
