@@ -19,11 +19,11 @@ sealed class Screen(
     object Settings : Screen("settings", "Ajustes", Icons.Default.Settings)
 
     // Pantalla fullscreen sin icono ni título
-    object DuranteRunning : Screen("durante_running_screen/{avisarCada}/{durante}") {
-        fun createRoute(avisarCada: Int, durante: Int): String =
-            "durante_running_screen/$avisarCada/$durante"
+    object DuranteRunning : Screen("durante_running_screen/{avisarCada}/{duranteMin}") {
+        fun createRoute(avisarCada: Int, duranteMin: Int): String =
+            "durante_running_screen/$avisarCada/$duranteMin"
 
-        const val routeWithArgs = "durante_running_screen/{avisarCada}/{durante}"
+        const val routeWithArgs = "durante_running_screen/{avisarCada}/{duranteMin}"
         override val title: String = "Durante (full)"
         override val icon: ImageVector? = null
     }

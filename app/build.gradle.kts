@@ -26,18 +26,24 @@ android {
             )
         }
     }
+    packaging {
+        jniLibs {
+            // NO legacy (no comprimir). Así AGP alinea a 16 KB las .so en el ZIP.
+            useLegacyPackaging = false
+        }
+    }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.12"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
     signingConfigs {
         create("release") {

@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.bungaedu.donotbelate.MainActivity
 import com.bungaedu.donotbelate.R
 
 @SuppressLint("MissingPermission") // Recuerda pedir el permiso de notificaciones en Android 13+
@@ -34,20 +33,6 @@ object NotificationHelper {
     }
 
     /**
-     * Construye la notificación que se usará en segundo plano (para startForeground).
-     */
-    fun buildForegroundNotification(
-        context: Context,
-        title: String,
-        content: String
-    ): Notification = buildNotification(
-        context = context,
-        title = title,
-        content = content,
-        isOngoing = true
-    )
-
-    /**
      * Construye una notificación completa con botón para cancelar (detener el temporizador).
      */
     private fun buildNotification(
@@ -56,43 +41,51 @@ object NotificationHelper {
         content: String,
         isOngoing: Boolean
     ): Notification {
-        // Abrir la app al tocar la notificación
-        val openIntent = Intent(context, MainActivity::class.java)
-        val openPendingIntent = PendingIntent.getActivity(
-            context, 0, openIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        // Intent para traer la app tal cual esté (si hay task) o abrirla normal (si no)
+        val launchIntent = context.packageManager
+            .getLaunchIntentForPackage(context.packageName)
+            ?.apply {
+                addFlags(
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or // trae al frente si existe
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP or       // evita recrear si ya está arriba
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP           // limpia duplicados si los hubiera
+                )
+            }
 
-        // Botón "Cancelar"
-        val stopIntent = Intent(context, StopTimerReceiver::class.java)
-        val stopPendingIntent = PendingIntent.getBroadcast(
-            context, 0, stopIntent,
+        val contentPendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            launchIntent, // puede ser null solo en casos raros; en la práctica no lo es
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher_foreground) // Pon aquí tu icono real
+            .setSmallIcon(R.mipmap.ic_launcher_foreground)
             .setContentTitle(title)
             .setContentText(content)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setOngoing(isOngoing)         // ← ¿se puede deslizar?
-            .setAutoCancel(!isOngoing)     // ← autocancel si no es persistente
-            .setContentIntent(openPendingIntent)
-            //.addAction(R.mipmap.ic_launcher_foreground, "Cancelar", stopPendingIntent)
+            .setOnlyAlertOnce(true)
+            .setOngoing(isOngoing)
+            .setAutoCancel(!isOngoing)
+            .setContentIntent(contentPendingIntent)
             .build()
     }
+
+    /**
+     * Construye la notificación que se usará en segundo plano (para startForeground).
+     */
+    fun buildForegroundNotification(context: Context, title: String, content: String) =
+        buildNotification(context, title, content, true)
 
     /**
      * Actualiza la notificación en cualquier momento (por ejemplo, "quedan X minutos").
      */
     fun updateNotification(
-        context: Context,
-        title: String,
-        content: String,
-        isOngoing: Boolean = true
+        context: Context, title: String, content: String,
+        isOngoing: Boolean
     ) {
-        val updated = buildNotification(context, title, content, isOngoing)
-        NotificationManagerCompat.from(context).notify(TIMER_NOTIFICATION_ID, updated)
+        val n = buildNotification(context, title, content, isOngoing)
+        NotificationManagerCompat.from(context).notify(TIMER_NOTIFICATION_ID, n)
     }
 
     /**
