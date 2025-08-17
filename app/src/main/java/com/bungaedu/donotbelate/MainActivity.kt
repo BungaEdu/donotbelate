@@ -6,10 +6,14 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.bungaedu.donotbelate.logic.NotificationHelper
 import com.bungaedu.donotbelate.logic.TtsManager
 import com.bungaedu.donotbelate.presentation.screens.MainScreen
 import com.bungaedu.donotbelate.presentation.theme.MyAppTheme
+import com.bungaedu.donotbelate.service.DuranteService
 import org.koin.android.ext.android.inject
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.appupdate.AppUpdateInfo
@@ -36,6 +40,14 @@ class MainActivity : ComponentActivity() {
         // Cargar la UI Compose
         setContent {
             MyAppTheme {
+                // 🔍 Debug: Mostrar estado del servicio
+                val serviceRunning by DuranteService.isRunning.collectAsState()
+                val minutosRestantes by DuranteService.minutosRestantes.collectAsState()
+
+                LaunchedEffect(serviceRunning, minutosRestantes) {
+                    Log.d(TAG, "Servicio corriendo: $serviceRunning, Minutos: $minutosRestantes")
+                }
+
                 MainScreen()
             }
         }

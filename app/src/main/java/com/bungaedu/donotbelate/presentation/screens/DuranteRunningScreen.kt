@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.bungaedu.donotbelate.service.DuranteService
-import com.bungaedu.donotbelate.logic.NotificationHelper
 import com.bungaedu.donotbelate.logic.TimerHolder
 import com.bungaedu.donotbelate.presentation.theme.GalanoGrotesque
 import com.bungaedu.donotbelate.presentation.viewmodel.DuranteViewModel
@@ -28,18 +27,17 @@ private const val TAG = "*DuranteRunningScreen"
 @Composable
 fun DuranteRunningScreen(
     navController: NavController,
-    avisarCadaMin: Int,
-    duranteMin: Int,
-    viewModel: DuranteViewModel = viewModel()
+    duranteViewModel: DuranteViewModel = viewModel()
 ) {
-    val tiempoRestante by viewModel.tiempoRestante.collectAsState()
+    val tiempoRestante by duranteViewModel.tiempoRestante.collectAsState()
+    val avisarCadaMin by duranteViewModel.avisarCadaMin.collectAsState()
+    val duranteMin by duranteViewModel.duranteMin.collectAsState()
+
     val context = LocalContext.current
 
     // 🔁 Al entrar en la pantalla, inicia el timer y el servicio foreground
     LaunchedEffect(Unit) {
-        TimerHolder.viewModel = viewModel
-        viewModel.startListening(context)
-        DuranteService.start(context, duranteMin, avisarCadaMin)
+        TimerHolder.viewModel = duranteViewModel
     }
 
     // ⬅️ Si se pulsa atrás, se detiene el timer y se cierra la pantalla
@@ -57,9 +55,7 @@ fun DuranteRunningScreen(
         // ❌ Botón para cerrar (top-right)
         IconButton(
             onClick = {
-                viewModel.stopListening(context)
-                DuranteService.stop(context) // Detiene el servicio
-                NotificationHelper.cancelAll(context) // Cancela la notificación
+                duranteViewModel.stopTimer(context)
                 navController.popBackStack() // Cierra pantalla
             },
             modifier = Modifier

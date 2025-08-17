@@ -41,23 +41,8 @@ fun SetupNavGraph(
             SettingsScreen(navController)
         }
 
-        composable(
-            route = Screen.DuranteRunning.route,
-            arguments = listOf(
-                navArgument("avisarCada") { type = NavType.IntType },
-                navArgument("duranteMin") { type = NavType.IntType }
-            )
-        ) { backStackEntry ->
-            val avisarCada = backStackEntry.arguments?.getInt("avisarCada")!!
-            val duranteMin = backStackEntry.arguments?.getInt("duranteMin")!!
-
-            Log.d(TAG, "Navigated to DuranteRunningScreen: avisarCada=$avisarCada, durante=$duranteMin")
-
-            DuranteRunningScreen(
-                navController = navController,
-                avisarCadaMin = avisarCada,
-                duranteMin = duranteMin
-            )
+        composable(route = Screen.DuranteRunning.route) {
+            DuranteRunningScreen(navController)
         }
     }
 }

@@ -15,6 +15,7 @@ import com.bungaedu.donotbelate.presentation.components.NumberPickerComposable
 import com.bungaedu.donotbelate.presentation.components.NotificationPermissionBottomSheet
 import com.bungaedu.donotbelate.presentation.viewmodel.DeviceSettingsViewModel
 import com.bungaedu.donotbelate.data.TimerPrefs
+import com.bungaedu.donotbelate.service.DuranteService
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -29,34 +30,32 @@ fun DuranteScreen(
     val context = LocalContext.current
     val notificationsAllowed by deviceSettingsViewModel.notificationsAllowed.collectAsState()
 
-    // 1) Args de navegación (si llegan)
-    val avisoArg = navController.currentBackStackEntry
-        ?.arguments?.getString("avisar")?.toIntOrNull()
-    val duranteArg = navController.currentBackStackEntry
-        ?.arguments?.getString("minuto")?.toIntOrNull()
+    // 1) Leemos DataStore (pueden ser null la 1ª vez)
+    val savedAvisar by TimerPrefs.avisarFlow(context).collectAsState(initial = null)
+    val savedDurante by TimerPrefs.duranteFlow(context).collectAsState(initial = null)
 
-    // 2) Flows de DataStore (pueden ser null la 1ª vez)
-    val savedAvisar by remember(context) { TimerPrefs.avisarFlow(context) }
-        .collectAsState(initial = null)
-    val savedDurante by remember(context) { TimerPrefs.duranteFlow(context) }
-        .collectAsState(initial = null)
+    // 2) Estado local (source of truth en UI)
+    var avisarCadaMin by remember { mutableIntStateOf(range.first) }
+    var duranteMin by remember { mutableIntStateOf(range.first) }
 
-    // 3) Iniciales: prioridad -> args > DataStore > rango.first
-    var avisarCada by remember(savedAvisar, avisoArg) {
-        mutableIntStateOf(
-            (avisoArg ?: savedAvisar)?.takeIf { it in range } ?: range.first
-        )
-    }
-    var duranteMin by remember(savedDurante, duranteArg) {
-        mutableIntStateOf(
-            (duranteArg ?: savedDurante)?.takeIf { it in range } ?: range.first
-        )
+    var isStartingService by remember { mutableStateOf(false) }
+
+    // Para no sobreescribir lo que el usuario ya tocó
+    var initialized by remember { mutableStateOf(false) }
+
+    // 3) Inicializamos desde Prefs una única vez cuando lleguen
+    LaunchedEffect(savedAvisar, savedDurante) {
+        if (!initialized) {
+            avisarCadaMin = (savedAvisar ?: range.first).coerceIn(range)
+            duranteMin = (savedDurante ?: range.first).coerceIn(range)
+            initialized = true
+        }
     }
 
     // 4) Guardar en DataStore cuando cambien
     fun onAvisarChange(v: Int) {
         val safe = v.coerceIn(range)
-        avisarCada = safe
+        avisarCadaMin = safe
         scope.launch { TimerPrefs.setAvisar(context, safe) }
     }
 
@@ -72,7 +71,8 @@ fun DuranteScreen(
     ) { granted ->
         if (granted || notificationsAllowed) {
             showBottomSheet = false
-            navController.navigate("durante_running_screen/$avisarCada/$duranteMin")
+            //TODO quitar las variables y se quedará todo en el datastore
+            navController.navigate("durante_running_screen/$avisarCadaMin/$duranteMin")
         } else {
             // Keep bottom sheet open to offer Settings option
             showBottomSheet = true
@@ -113,7 +113,7 @@ fun DuranteScreen(
         ) {
             Text("Avisar cada", style = MaterialTheme.typography.headlineMedium)
             NumberPickerComposable(
-                value = avisarCada,
+                value = avisarCadaMin,
                 onValueChange = ::onAvisarChange,
                 range = range
             )
@@ -135,16 +135,33 @@ fun DuranteScreen(
 
         Button(
             onClick = {
-                val a = avisarCada.coerceIn(range)
-                val d = duranteMin.coerceIn(range)
                 if (notificationsAllowed) {
-                    navController.navigate("durante_running_screen/$a/$d")
+                    isStartingService = true
+                    //TODO hacer lo de datastore
+                    DuranteService.start(context, avisarCadaMin, duranteMin)
                 } else {
                     deviceSettingsViewModel.onStartPressed()
                 }
             },
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Empezar") }
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isStartingService
+        ) {
+            if (isStartingService) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Text("Iniciando…")
+                }
+            } else {
+                Text("Empezar")
+            }
+        }
     }
 
     NotificationPermissionBottomSheet(

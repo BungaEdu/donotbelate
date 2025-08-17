@@ -9,6 +9,8 @@ import androidx.navigation.compose.rememberNavController
 import com.bungaedu.donotbelate.presentation.components.TopBar
 import com.bungaedu.donotbelate.navigation.SetupNavGraph
 import com.bungaedu.donotbelate.presentation.components.BottomNavigationBar
+import com.bungaedu.donotbelate.service.DuranteService
+
 
 private const val TAG = "*HastaScreen"
 
@@ -18,10 +20,10 @@ fun MainScreen() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val serviceRunning by DuranteService.isRunning.collectAsState()
 
     val showTopBar = currentRoute !in listOf(
         Screen.Settings.route,
-        Screen.DuranteRunning.routeWithArgs
     )
 
     val showBottomBar = currentRoute in listOf(
@@ -29,6 +31,16 @@ fun MainScreen() {
         Screen.Hasta.route,
         Screen.Profile.route
     )
+
+    LaunchedEffect(serviceRunning) {
+        if (serviceRunning && currentRoute != Screen.DuranteRunning.route) {
+            navController.navigate(Screen.DuranteRunning.route) {
+                popUpTo(navController.graph.startDestinationId) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
