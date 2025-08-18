@@ -1,4 +1,4 @@
-package com.bungaedu.donotbelate.presentation.screens
+package com.bungaedu.donotbelate.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person

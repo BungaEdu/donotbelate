@@ -23,6 +23,7 @@ class TtsManager() {
             putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1f)
         }
     }
+
     fun isReady(): Boolean = textToSpeech != null
     private var textToSpeech: TextToSpeech? = null
     private var prefs: SharedPreferences? = null
@@ -88,15 +89,18 @@ class TtsManager() {
     }
 
     private fun createFocusRequest() {
-        audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
-            .setAudioAttributes(AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
-                .build())
-            .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener {
-                // No hacemos nada cuando perdemos el enfoque
-            }
-            .build()
+        audioFocusRequest =
+            AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                        .build()
+                )
+                .setAcceptsDelayedFocusGain(true)
+                .setOnAudioFocusChangeListener {
+                    // No hacemos nada cuando perdemos el enfoque
+                }
+                .build()
     }
 
     fun speak(textToRead: String) {
@@ -122,13 +126,19 @@ class TtsManager() {
         if (muteDuringCall) {
             if (focusRequest == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                 Log.i(TAG, "Audio focus A: $focusRequest")
-                val result = textToSpeech?.speak(textToRead, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
+                val result =
+                    textToSpeech?.speak(textToRead, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
                 handleTextToSpeechResult(result ?: TextToSpeech.ERROR, textToRead)
             }
         } else {
             if (focusRequest == AudioManager.AUDIOFOCUS_REQUEST_GRANTED || focusRequest == AudioManager.AUDIOFOCUS_REQUEST_DELAYED || focusRequest == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
                 Log.i(TAG, "Audio focus B: $focusRequest")
-                val result = textToSpeech?.speak("¡ATENCIÓN! $textToRead", TextToSpeech.QUEUE_FLUSH, params, utteranceId)
+                val result = textToSpeech?.speak(
+                    "¡ATENCIÓN! $textToRead",
+                    TextToSpeech.QUEUE_FLUSH,
+                    params,
+                    utteranceId
+                )
                 handleTextToSpeechResult(result ?: TextToSpeech.ERROR, textToRead)
             }
         }

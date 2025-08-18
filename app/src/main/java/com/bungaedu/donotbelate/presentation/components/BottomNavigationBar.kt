@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.bungaedu.donotbelate.presentation.screens.Screen
+import com.bungaedu.donotbelate.navigation.Screen
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {

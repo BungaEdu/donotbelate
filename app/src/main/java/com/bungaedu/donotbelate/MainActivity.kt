@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
 
         // Crear canal de notificación y inicializar TTS
         NotificationHelper.createNotificationChannel(this)
-        ttsManager.init(applicationContext)
+        ttsManager.init(this)
 
         // Cargar la UI Compose
         setContent {
