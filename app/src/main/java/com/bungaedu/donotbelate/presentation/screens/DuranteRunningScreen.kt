@@ -29,14 +29,16 @@ fun DuranteRunningScreen(
     navController: NavController,
     duranteViewModel: DuranteViewModel = viewModel()
 ) {
-    val tiempoRestante by duranteViewModel.tiempoRestante.collectAsState()
-    val avisarCadaMin by duranteViewModel.avisarCadaMin.collectAsState()
-    val duranteMin by duranteViewModel.duranteMin.collectAsState()
+    // 👀 Los Flow son Int? → hay que poner initial = null
+    val tiempoRestante by duranteViewModel.tiempoRestante.collectAsState(initial = null)
+    val avisarCadaMin by duranteViewModel.avisarCadaMin.collectAsState(initial = null)
+    val duranteMin by duranteViewModel.duranteMin.collectAsState(initial = null)
 
     val context = LocalContext.current
 
     // 🔁 Al entrar en la pantalla, inicia el timer y el servicio foreground
     LaunchedEffect(Unit) {
+        //TODO revisar si es necesario seguir utilizando esto
         TimerHolder.viewModel = duranteViewModel
     }
 

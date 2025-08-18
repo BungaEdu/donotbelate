@@ -7,13 +7,11 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import com.bungaedu.donotbelate.data.repository.TimerConfigRepository
 import com.bungaedu.donotbelate.logic.NotificationHelper
 import com.bungaedu.donotbelate.logic.TtsManager
 import com.bungaedu.donotbelate.presentation.screens.MainScreen
 import com.bungaedu.donotbelate.presentation.theme.MyAppTheme
-import com.bungaedu.donotbelate.service.DuranteService
 import org.koin.android.ext.android.inject
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.appupdate.AppUpdateInfo
@@ -24,9 +22,11 @@ import com.google.android.play.core.install.model.UpdateAvailability
 private const val TAG = "*MainActivity"
 
 class MainActivity : ComponentActivity() {
+    //TODO inyectar bien, ver si esto es buena práctica
     private val ttsManager: TtsManager by inject()
     private val updateManager by lazy { AppUpdateManagerFactory.create(this) }
     private val REQUEST_CODE_UPDATE = 1001
+    private val repo: TimerConfigRepository by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,12 +40,8 @@ class MainActivity : ComponentActivity() {
         // Cargar la UI Compose
         setContent {
             MyAppTheme {
-                // 🔍 Debug: Mostrar estado del servicio
-                val serviceRunning by DuranteService.isRunning.collectAsState()
-                val minutosRestantes by DuranteService.minutosRestantes.collectAsState()
-
-                LaunchedEffect(serviceRunning, minutosRestantes) {
-                    Log.d(TAG, "Servicio corriendo: $serviceRunning, Minutos: $minutosRestantes")
+                LaunchedEffect(repo.isRunningFlow()) {
+                    Log.d(TAG, "Servicio corriendo: ${repo.isRunningFlow()}")
                 }
 
                 MainScreen()

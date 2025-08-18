@@ -4,11 +4,11 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.bungaedu.donotbelate.presentation.screens.*
+import com.bungaedu.donotbelate.presentation.viewmodel.DuranteViewModel
+import org.koin.androidx.compose.koinViewModel
 
 private const val TAG = "*SetupNavGraph"
 @Composable
@@ -42,7 +42,9 @@ fun SetupNavGraph(
         }
 
         composable(route = Screen.DuranteRunning.route) {
-            DuranteRunningScreen(navController)
+            Log.d(TAG, "Navigated to DuranteRunningScreen")
+            val duranteViewModel: DuranteViewModel = koinViewModel()
+            DuranteRunningScreen(navController, duranteViewModel)
         }
     }
 }

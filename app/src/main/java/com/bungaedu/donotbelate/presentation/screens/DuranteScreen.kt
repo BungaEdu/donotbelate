@@ -1,6 +1,7 @@
 package com.bungaedu.donotbelate.presentation.screens
 
 import android.Manifest
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -11,72 +12,69 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.bungaedu.donotbelate.data.repository.TimerConfigRepository
 import com.bungaedu.donotbelate.presentation.components.NumberPickerComposable
 import com.bungaedu.donotbelate.presentation.components.NotificationPermissionBottomSheet
 import com.bungaedu.donotbelate.presentation.viewmodel.DeviceSettingsViewModel
-import com.bungaedu.donotbelate.data.TimerPrefs
 import com.bungaedu.donotbelate.service.DuranteService
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.koinViewModel
+
+private const val TAG = "*DuranteScreen"
 
 @Composable
 fun DuranteScreen(
     navController: NavController,
-    deviceSettingsViewModel: DeviceSettingsViewModel = koinViewModel()
+    deviceSettingsViewModel: DeviceSettingsViewModel = koinViewModel(),
+    repo: TimerConfigRepository = get()
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val range = 1..59
     val context = LocalContext.current
+
     val notificationsAllowed by deviceSettingsViewModel.notificationsAllowed.collectAsState()
-
-    // 1) Leemos DataStore (pueden ser null la 1ª vez)
-    val savedAvisar by TimerPrefs.avisarFlow(context).collectAsState(initial = null)
-    val savedDurante by TimerPrefs.duranteFlow(context).collectAsState(initial = null)
-
-    // 2) Estado local (source of truth en UI)
     var avisarCadaMin by remember { mutableIntStateOf(range.first) }
     var duranteMin by remember { mutableIntStateOf(range.first) }
-
     var isStartingService by remember { mutableStateOf(false) }
+    val isRunningService by repo.isRunningFlow().collectAsState(initial = false)
 
-    // Para no sobreescribir lo que el usuario ya tocó
-    var initialized by remember { mutableStateOf(false) }
+    // 1) HIDRATA UNA SOLA VEZ desde DataStore (lectura puntual, sin flows)
+    LaunchedEffect(Unit) {
+        repo.getAvisar()?.let { avisarCadaMin = it.coerceIn(range) }
+        repo.getDurante()?.let { duranteMin = it.coerceIn(range) }
+    }
 
-    // 3) Inicializamos desde Prefs una única vez cuando lleguen
-    LaunchedEffect(savedAvisar, savedDurante) {
-        if (!initialized) {
-            avisarCadaMin = (savedAvisar ?: range.first).coerceIn(range)
-            duranteMin = (savedDurante ?: range.first).coerceIn(range)
-            initialized = true
+    fun onAvisarChange(v: Int) {
+        val s = v.coerceIn(range)
+        avisarCadaMin = s
+        scope.launch {
+            try {
+                repo.setAvisar(s)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving avisarCadaMin: $s", e)
+            }
         }
     }
 
-    // 4) Guardar en DataStore cuando cambien
-    fun onAvisarChange(v: Int) {
-        val safe = v.coerceIn(range)
-        avisarCadaMin = safe
-        scope.launch { TimerPrefs.setAvisar(context, safe) }
-    }
-
     fun onDuranteChange(v: Int) {
-        val safe = v.coerceIn(range)
-        duranteMin = safe
-        scope.launch { TimerPrefs.setDurante(context, safe) }
+        val s = v.coerceIn(range)
+        duranteMin = s
+        scope.launch {
+            try {
+                repo.setDurante(s)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving duranteMin: $s", e)
+            }
+        }
     }
 
     // Permission launcher for Android 13+
     val requestNotificationsPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (granted || notificationsAllowed) {
-            showBottomSheet = false
-            //TODO quitar las variables y se quedará todo en el datastore
-            navController.navigate("durante_running_screen/$avisarCadaMin/$duranteMin")
-        } else {
-            // Keep bottom sheet open to offer Settings option
-            showBottomSheet = true
-        }
+        showBottomSheet = !(granted || notificationsAllowed)
     }
 
     // Handle ViewModel events
@@ -99,7 +97,6 @@ fun DuranteScreen(
         }
     }
 
-    // ----- UI -----
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -137,37 +134,52 @@ fun DuranteScreen(
             onClick = {
                 if (notificationsAllowed) {
                     isStartingService = true
-                    //TODO hacer lo de datastore
-                    DuranteService.start(context, avisarCadaMin, duranteMin)
+                    scope.launch {
+                        // Defensivo: persiste lo que hay en UI (por si acaso)
+                        repo.setAvisar(avisarCadaMin)
+                        repo.setDurante(duranteMin)
+
+                        DuranteService.start(context)
+                    }
                 } else {
                     deviceSettingsViewModel.onStartPressed()
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = !isStartingService
+            enabled = !isStartingService && !isRunningService
         ) {
-            if (isStartingService) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                    Text("Iniciando…")
+            when {
+                isStartingService -> {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Iniciando")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
                 }
-            } else {
-                Text("Empezar")
+
+                isRunningService -> {
+                    isStartingService = false
+                    navController.navigate(Screen.DuranteRunning.route)
+                }
+
+                else -> {
+                    Text("Empezar")
+                }
             }
         }
-    }
 
-    NotificationPermissionBottomSheet(
-        isVisible = showBottomSheet,
-        shouldRedirectToSettings = deviceSettingsViewModel.shouldRedirectToSettings(),
-        onRequestPermission = { deviceSettingsViewModel.onPermissionBottomSheetConfirmed() },
-        onDismiss = { showBottomSheet = false }
-    )
+        NotificationPermissionBottomSheet(
+            isVisible = showBottomSheet,
+            shouldRedirectToSettings = deviceSettingsViewModel.shouldRedirectToSettings(),
+            onRequestPermission = { deviceSettingsViewModel.onPermissionBottomSheetConfirmed() },
+            onDismiss = { showBottomSheet = false }
+        )
+    }
 }

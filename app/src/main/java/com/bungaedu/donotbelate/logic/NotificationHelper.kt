@@ -7,6 +7,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -32,6 +33,27 @@ object NotificationHelper {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
         Log.d(TAG, "Notificación creada")
+    }
+
+    /**
+     * Crea el canal de notificaciones si hace falta (Android 8+).
+     * Se puede llamar tantas veces como quieras; es idempotente.
+     */
+    fun ensureChannel(context: Context) {
+        val importance = NotificationManager.IMPORTANCE_LOW
+        val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance).apply {
+            description = "CHANNEL_DESC"
+            enableLights(false)
+            enableVibration(false)
+            setShowBadge(false)
+            // Si quieres que no haga ruido:
+            setSound(null, null)
+            lightColor = Color.BLUE
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+        }
+
+        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.createNotificationChannel(channel)
     }
 
     /**

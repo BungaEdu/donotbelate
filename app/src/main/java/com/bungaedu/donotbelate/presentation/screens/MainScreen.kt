@@ -6,21 +6,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.bungaedu.donotbelate.data.repository.TimerConfigRepository
 import com.bungaedu.donotbelate.presentation.components.TopBar
 import com.bungaedu.donotbelate.navigation.SetupNavGraph
 import com.bungaedu.donotbelate.presentation.components.BottomNavigationBar
-import com.bungaedu.donotbelate.service.DuranteService
-
+import org.koin.androidx.compose.get
 
 private const val TAG = "*HastaScreen"
 
 @Composable
 fun MainScreen() {
-    val TAG = "*MainScreen"
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val serviceRunning by DuranteService.isRunning.collectAsState()
+    val repo: TimerConfigRepository = get()
+    val serviceRunning by repo.isRunningFlow().collectAsState(initial = false)
 
     val showTopBar = currentRoute !in listOf(
         Screen.Settings.route,

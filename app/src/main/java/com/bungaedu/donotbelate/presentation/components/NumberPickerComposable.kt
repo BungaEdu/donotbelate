@@ -4,6 +4,8 @@ import android.widget.NumberPicker
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.viewinterop.AndroidView
 
+const val TAG = "*NumberPicker"
+
 @Composable
 fun NumberPickerComposable(
     value: Int,
@@ -23,14 +25,12 @@ fun NumberPickerComposable(
                 descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
                 wrapSelectorWheel = true
 
-                setOnValueChangedListener { _, _, newVal ->
-                    // 3) Notifica solo si realmente cambia
-                    if (newVal != value) onValueChange(newVal)
+                setOnValueChangedListener { picker, oldVal, newVal ->
+                    onValueChange(newVal)
                 }
 
                 // 4) Si el padre venía con 0 (u otro fuera de rango), sincroniza hacia arriba una vez
                 if (coerced != value) {
-                    // Postea al siguiente loop para evitar conflictos de inicialización
                     post { onValueChange(coerced) }
                 }
             }

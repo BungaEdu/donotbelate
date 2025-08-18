@@ -1,52 +1,33 @@
 package com.bungaedu.donotbelate.service
 
-import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.core.content.ContextCompat
+import com.bungaedu.donotbelate.data.repository.TimerConfigRepository
 import com.bungaedu.donotbelate.logic.NotificationHelper
 import com.bungaedu.donotbelate.logic.TtsManager
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import org.koin.android.ext.android.inject
 
 private const val TAG = "*DuranteService"
 
 class DuranteService : Service() {
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var timerJob: Job? = null
 
-    // ✅ Inyección de TtsManager con Koin
+    // TODO arreglar con Koin e inyección de dependencias con buenas prácticas
     private val ttsManager: TtsManager by inject()
+    private val repo: TimerConfigRepository by inject()
 
     companion object {
-        // StateFlow para el estado del servicio
-        private val _isRunning = MutableStateFlow(false)
-        val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
-
-        // StateFlow para los minutos restantes
-        private val _minutosRestantes = MutableStateFlow(0)
-        val minutosRestantes: StateFlow<Int> = _minutosRestantes.asStateFlow()
-
-        // StateFlow para la configuración actual
-        private val _avisarCadaMin = MutableStateFlow(0)
-        val avisarCadaMin: StateFlow<Int> = _avisarCadaMin.asStateFlow()
-
-        private val _duranteMin = MutableStateFlow(0)
-        val duranteMin: StateFlow<Int> = _duranteMin.asStateFlow()
-
-        //TODO Hacer lo del datastore
-        fun start(context: Context, avisarCadaMin: Int, duranteMin: Int) {
-            val intent = Intent(context, DuranteService::class.java).apply {
-                putExtra("avisarCadaMin", avisarCadaMin)
-                putExtra("duranteMin", duranteMin)
-            }
-            context.startForegroundService(intent)
+        fun start(context: Context) {
+            ContextCompat.startForegroundService(
+                context,
+                Intent(context, DuranteService::class.java)
+            )
         }
 
         fun stop(context: Context) {
@@ -54,30 +35,38 @@ class DuranteService : Service() {
         }
     }
 
-    @SuppressLint("ForegroundServiceType") //TODO revisar si necesito algo para quitar el supress
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val duranteMin = intent?.getIntExtra("duranteMin", 0) ?: 0
-        val avisarCadaMin = intent?.getIntExtra("avisarCadaMin", 1) ?: 1
+        Log.d(TAG, "onStartCommand(flags=$flags, startId=$startId, intent=$intent)")
 
-        // Actualizar StateFlow
-        //TODO ver a quien orquesta esta info para cargármela con datastore
-        _isRunning.value = true
-        _avisarCadaMin.value = avisarCadaMin
-        _duranteMin.value = duranteMin
-        //_minutosRestantes.value = esto lo modifica el timer
-
-        val initialNotification = NotificationHelper.buildForegroundNotification(
+        // Notificación inicial obligatoria (<5s)
+        NotificationHelper.ensureChannel(this)
+        val initial = NotificationHelper.buildForegroundNotification(
             context = this,
-            title = "Avisar cada $avisarCadaMin minutos durante $duranteMin minutos",
-            content = "Te quedan $duranteMin minutos"
+            title = "Iniciando…",
+            content = "Preparando temporizador"
         )
 
-        // Mostrar la notificación como foreground
-        startForeground(100, initialNotification)
+        startForeground(100, initial)
 
-        // Iniciar temporizador
-        //TODO Aquí pasarle lo de datastore
-        startTimer(avisarCadaMin, duranteMin)
+        serviceScope.launch {
+            val avisar = repo.getAvisar() ?: 1
+            val durante = repo.getDurante() ?: 1
+
+            Log.d(TAG, "Config desde DataStore → avisar=$avisar, durante=$durante")
+
+            // Estado inicial en DataStore
+            repo.setIsRunning(true)
+
+            // Actualiza notificación real
+            NotificationHelper.updateNotification(
+                context = this@DuranteService,
+                title = "Avisar cada $avisar min durante $durante min",
+                content = "Te quedan $durante minutos",
+                isOngoing = true
+            )
+
+            startTimer(avisar, durante)
+        }
 
         return START_NOT_STICKY
     }
@@ -87,13 +76,7 @@ class DuranteService : Service() {
         timerJob = serviceScope.launch {
             for (minutos in duranteMin downTo 0) {
                 // Actualizar StateFlow con minutos restantes
-                _minutosRestantes.value = minutos
-
-                // 🔁 Emitir evento con minutos restantes
-                val intent = Intent("TIEMPO_RESTANTE_UPDATE").apply {
-                    putExtra("minutosRestantes", minutos)
-                }
-                LocalBroadcastManager.getInstance(this@DuranteService).sendBroadcast(intent)
+                repo.setMinutosRestantes(minutos)
 
                 if (minutos > 0 && minutos % avisarCadaMin == 0) {
                     Log.i(TAG, "Entro en condicional para speak")
@@ -130,20 +113,30 @@ class DuranteService : Service() {
 
                 delay(60_000)
             }
-
+            repo.setIsRunning(false)
             stopSelf()
+        }
+    }
+
+    private fun cleanup() {
+        // 1. Cancelar el timer job
+        timerJob?.cancel()
+        timerJob = null
+
+        // 2. Cancelar todas las notificaciones
+        NotificationHelper.cancelAll(this)
+
+        // 3. Limpiar estado en DataStore (ahora con serviceScope)
+        serviceScope.launch {
+            repo.setIsRunning(false)
+            repo.setMinutosRestantes(0)
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        timerJob?.cancel()
-        NotificationHelper.cancelAll(this)
-        // Actualizar StateFlow
-        _isRunning.value = false
-        _avisarCadaMin.value = 0
-        _duranteMin.value = 0
-        _minutosRestantes.value = 0
+        cleanup()
+        serviceScope.cancel() // Cancelar el scope al final
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
