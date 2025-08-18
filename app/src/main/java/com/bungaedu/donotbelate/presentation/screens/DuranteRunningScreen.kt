@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.bungaedu.donotbelate.service.DuranteService
-import com.bungaedu.donotbelate.logic.TimerHolder
 import com.bungaedu.donotbelate.presentation.theme.GalanoGrotesque
 import com.bungaedu.donotbelate.presentation.viewmodel.DuranteViewModel
 
@@ -30,17 +29,11 @@ fun DuranteRunningScreen(
     duranteViewModel: DuranteViewModel = viewModel()
 ) {
     // 👀 Los Flow son Int? → hay que poner initial = null
-    val tiempoRestante by duranteViewModel.tiempoRestante.collectAsState(initial = null)
+    val minutosRestantes by duranteViewModel.minutosRestantes.collectAsState(initial = null)
     val avisarCadaMin by duranteViewModel.avisarCadaMin.collectAsState(initial = null)
     val duranteMin by duranteViewModel.duranteMin.collectAsState(initial = null)
 
     val context = LocalContext.current
-
-    // 🔁 Al entrar en la pantalla, inicia el timer y el servicio foreground
-    LaunchedEffect(Unit) {
-        //TODO revisar si es necesario seguir utilizando esto
-        TimerHolder.viewModel = duranteViewModel
-    }
 
     // ⬅️ Si se pulsa atrás, se detiene el timer y se cierra la pantalla
     BackHandler {
@@ -57,7 +50,7 @@ fun DuranteRunningScreen(
         // ❌ Botón para cerrar (top-right)
         IconButton(
             onClick = {
-                duranteViewModel.stopTimer(context)
+                DuranteService.stop(context)
                 navController.popBackStack() // Cierra pantalla
             },
             modifier = Modifier
@@ -84,7 +77,7 @@ fun DuranteRunningScreen(
 
         // 🔢 Cuenta regresiva gigante en minutos
         Text(
-            text = tiempoRestante.toString(),
+            text = minutosRestantes.toString(),
             fontFamily = GalanoGrotesque,
             fontSize = 280.sp,
             color = Color(0xFFEAB916), // Amarillo
@@ -92,7 +85,7 @@ fun DuranteRunningScreen(
             lineHeight = 280.sp
         )
 
-        Log.d(TAG, "tiempoRestante: $tiempoRestante")
+        Log.d(TAG, "tiempoRestante: $minutosRestantes")
 
         // 📝 Texto inferior con info del aviso
         Text(

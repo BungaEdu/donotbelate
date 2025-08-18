@@ -25,10 +25,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- TODO hay que quitar este receiver -->
-        <receiver
-            android:name=".logic.StopTimerReceiver"
-            android:exported="true" />
         <service
             android:name=".service.DuranteService"
             android:exported="false"
