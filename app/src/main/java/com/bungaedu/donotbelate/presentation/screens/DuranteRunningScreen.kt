@@ -17,16 +17,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.bungaedu.donotbelate.data.repository.TimerStateRepository
 import com.bungaedu.donotbelate.service.DuranteService
 import com.bungaedu.donotbelate.presentation.theme.GalanoGrotesque
 import com.bungaedu.donotbelate.presentation.viewmodel.DuranteViewModel
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 
 private const val TAG = "*DuranteRunningScreen"
 
 @Composable
 fun DuranteRunningScreen(
     navController: NavController,
-    duranteViewModel: DuranteViewModel = viewModel()
+    duranteViewModel: DuranteViewModel = viewModel(),
+    repo: TimerStateRepository = get()
 ) {
     // 👀 Los Flow son Int? → hay que poner initial = null
     val minutosRestantes by duranteViewModel.minutosRestantes.collectAsState(initial = null)
@@ -34,6 +38,7 @@ fun DuranteRunningScreen(
     val duranteMin by duranteViewModel.duranteMin.collectAsState(initial = null)
 
     val context = LocalContext.current
+    val scopeButtonClose = rememberCoroutineScope()
 
     // ⬅️ Si se pulsa atrás, se detiene el timer y se cierra la pantalla
     BackHandler {
@@ -50,8 +55,11 @@ fun DuranteRunningScreen(
         // ❌ Botón para cerrar (top-right)
         IconButton(
             onClick = {
-                DuranteService.stop(context)
-                navController.popBackStack() // Cierra pantalla
+                scopeButtonClose.launch {
+                    repo.setIsRunning(false)
+                    DuranteService.stop(context)
+                    navController.popBackStack()
+                }
             },
             modifier = Modifier
                 .align(Alignment.TopEnd)

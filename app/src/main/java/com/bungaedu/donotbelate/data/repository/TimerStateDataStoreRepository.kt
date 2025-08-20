@@ -54,14 +54,14 @@ class TimerStateDataStoreRepository(
     override fun isRunningFlow() =
         dataStore.data.map { prefs ->
             val value = prefs[KEY_IS_RUNNING] ?: false
-            Log.d("TimerConfigRepository", "isRunningFlow emitió: $value")
+            Log.d(TAG, "isRunningFlow emitió: $value")
             value
         }
 
     override fun minutosRestantesFlow() =
         dataStore.data.map { prefs ->
             val value = prefs[KEY_MINUTOS_RESTANTES]
-            Log.d("TimerConfigRepository", "minutosRestantesFlow emitió: $value")
+            Log.d(TAG, "minutosRestantesFlow emitió: $value")
             value
         }
 

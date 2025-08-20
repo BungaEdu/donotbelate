@@ -1,5 +1,6 @@
 package com.bungaedu.donotbelate
 
+import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
@@ -7,11 +8,14 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.bungaedu.donotbelate.data.repository.TimerStateRepository
 import com.bungaedu.donotbelate.logic.NotificationHelper
 import com.bungaedu.donotbelate.logic.TtsManager
 import com.bungaedu.donotbelate.presentation.screens.MainScreen
 import com.bungaedu.donotbelate.presentation.theme.MyAppTheme
+import com.bungaedu.donotbelate.utils.isServiceRunning
 import org.koin.android.ext.android.inject
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.appupdate.AppUpdateInfo
@@ -39,12 +43,25 @@ class MainActivity : ComponentActivity() {
 
         // Cargar la UI Compose
         setContent {
-            MyAppTheme {
-                LaunchedEffect(repo.isRunningFlow()) {
-                    Log.d(TAG, "Servicio corriendo: ${repo.isRunningFlow()}")
-                }
+            setContent {
+                MyAppTheme {
+                    val isRunning by repo.isRunningFlow().collectAsState(initial = false)
 
-                MainScreen()
+                    LaunchedEffect(isRunning) {
+                        Log.d(TAG, "Servicio corriendo (DataStore): $isRunning")
+                        val runningReal = isServiceRunning(this@MainActivity)
+                        Log.d(TAG, "¿Servicio realmente activo?: $runningReal")
+
+                        if (!runningReal && isRunning) {
+                            Log.w(TAG, "⚠️ Corrigiendo isRunning fantasma en DataStore")
+                            repo.setIsRunning(false)
+                        } else {
+                            Log.d(TAG, "Información consistente: estado servicio e info Datastore igual")
+                        }
+                    }
+
+                    MainScreen()
+                }
             }
         }
         checkForUpdates()
