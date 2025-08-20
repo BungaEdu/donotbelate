@@ -7,7 +7,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.LaunchedEffect
-import com.bungaedu.donotbelate.data.repository.TimerConfigRepository
+import com.bungaedu.donotbelate.data.repository.TimerStateRepository
 import com.bungaedu.donotbelate.logic.NotificationHelper
 import com.bungaedu.donotbelate.logic.TtsManager
 import com.bungaedu.donotbelate.presentation.screens.MainScreen
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
     private val ttsManager: TtsManager by inject()
     private val updateManager by lazy { AppUpdateManagerFactory.create(this) }
     private val REQUEST_CODE_UPDATE = 1001
-    private val repo: TimerConfigRepository by inject()
+    private val repo: TimerStateRepository by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

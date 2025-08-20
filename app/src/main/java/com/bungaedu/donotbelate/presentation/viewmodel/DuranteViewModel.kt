@@ -1,16 +1,13 @@
 package com.bungaedu.donotbelate.presentation.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import com.bungaedu.donotbelate.data.repository.TimerConfigRepository
-import com.bungaedu.donotbelate.logic.NotificationHelper
-import com.bungaedu.donotbelate.service.DuranteService
+import com.bungaedu.donotbelate.data.repository.TimerStateRepository
 import kotlinx.coroutines.flow.Flow
 
 private const val TAG = "*DuranteViewModel"
 
 class DuranteViewModel(
-    repo: TimerConfigRepository
+    repo: TimerStateRepository
 ) : ViewModel() {
 
     // 👀 Observamos directamente DataStore

@@ -6,7 +6,7 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import androidx.core.content.ContextCompat
-import com.bungaedu.donotbelate.data.repository.TimerConfigRepository
+import com.bungaedu.donotbelate.data.repository.TimerStateRepository
 import com.bungaedu.donotbelate.logic.NotificationHelper
 import com.bungaedu.donotbelate.logic.TtsManager
 import kotlinx.coroutines.*
@@ -20,7 +20,7 @@ class DuranteService : Service() {
 
     // TODO arreglar con Koin e inyección de dependencias con buenas prácticas
     private val ttsManager: TtsManager by inject()
-    private val repo: TimerConfigRepository by inject()
+    private val repo: TimerStateRepository by inject()
 
     companion object {
         fun start(context: Context) {

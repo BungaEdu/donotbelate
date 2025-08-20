@@ -9,9 +9,9 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-class TimerPrefsRepository(
+class TimerStateDataStoreRepository(
     private val dataStore: DataStore<Preferences>
-) : TimerConfigRepository {
+) : TimerStateRepository {
 
     companion object {
         private const val TAG = "*TimerPrefsRepo"
@@ -52,10 +52,18 @@ class TimerPrefsRepository(
     }
 
     override fun isRunningFlow() =
-        dataStore.data.map { it[KEY_IS_RUNNING] ?: false }
+        dataStore.data.map { prefs ->
+            val value = prefs[KEY_IS_RUNNING] ?: false
+            Log.d("TimerConfigRepository", "isRunningFlow emitió: $value")
+            value
+        }
 
     override fun minutosRestantesFlow() =
-        dataStore.data.map { prefs -> prefs[KEY_MINUTOS_RESTANTES] }
+        dataStore.data.map { prefs ->
+            val value = prefs[KEY_MINUTOS_RESTANTES]
+            Log.d("TimerConfigRepository", "minutosRestantesFlow emitió: $value")
+            value
+        }
 
     override suspend fun setIsRunning(v: Boolean) {
         Log.d(TAG, "setIsRunning = $v")

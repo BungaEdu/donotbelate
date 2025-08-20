@@ -2,7 +2,7 @@ package com.bungaedu.donotbelate.data.repository
 
 import kotlinx.coroutines.flow.Flow
 
-interface TimerConfigRepository {
+interface TimerStateRepository {
     suspend fun getAvisar(): Int?
     suspend fun getDurante(): Int?
     fun avisarFlow(): Flow<Int?>

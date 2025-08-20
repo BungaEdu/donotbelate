@@ -6,8 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.preferencesDataStoreFile
-import com.bungaedu.donotbelate.data.repository.TimerConfigRepository
-import com.bungaedu.donotbelate.data.repository.TimerPrefsRepository
+import com.bungaedu.donotbelate.data.repository.TimerStateRepository
+import com.bungaedu.donotbelate.data.repository.TimerStateDataStoreRepository
 import com.bungaedu.donotbelate.logic.TtsManager
 import com.bungaedu.donotbelate.presentation.viewmodel.DeviceSettingsViewModel
 import com.bungaedu.donotbelate.presentation.viewmodel.DuranteViewModel
@@ -26,7 +26,7 @@ val appModule = module {
     }
 
     // ✅ Repo → implementación con la DataStore inyectada
-    single<TimerConfigRepository> { TimerPrefsRepository(get()) }
+    single<TimerStateRepository> { TimerStateDataStoreRepository(get()) }
 
     // ✅ TTS singleton (se inicializa en el Service)
     single { TtsManager() }

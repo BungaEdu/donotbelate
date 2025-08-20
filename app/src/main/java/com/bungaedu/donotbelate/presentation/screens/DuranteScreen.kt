@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.bungaedu.donotbelate.data.repository.TimerConfigRepository
+import com.bungaedu.donotbelate.data.repository.TimerStateRepository
 import com.bungaedu.donotbelate.navigation.Screen
 import com.bungaedu.donotbelate.presentation.components.NumberPickerComposable
 import com.bungaedu.donotbelate.presentation.components.NotificationPermissionBottomSheet
@@ -28,7 +28,7 @@ private const val TAG = "*DuranteScreen"
 fun DuranteScreen(
     navController: NavController,
     deviceSettingsViewModel: DeviceSettingsViewModel = koinViewModel(),
-    repo: TimerConfigRepository = get()
+    repo: TimerStateRepository = get()
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
