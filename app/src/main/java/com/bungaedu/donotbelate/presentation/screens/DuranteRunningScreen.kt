@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.bungaedu.donotbelate.data.repository.TimerStateRepository
+import com.bungaedu.donotbelate.navigation.Screen
 import com.bungaedu.donotbelate.service.DuranteService
 import com.bungaedu.donotbelate.presentation.theme.GalanoGrotesque
 import com.bungaedu.donotbelate.presentation.viewmodel.DuranteViewModel
@@ -55,10 +56,13 @@ fun DuranteRunningScreen(
         // ❌ Botón para cerrar (top-right)
         IconButton(
             onClick = {
+                Log.d(TAG, "Presiono cerrar")
                 scopeButtonClose.launch {
                     repo.setIsRunning(false)
                     DuranteService.stop(context)
-                    navController.popBackStack()
+                    //TODO solucionar el popBackStack, esto es un parche
+                    navController.navigate(Screen.Durante.route)
+                    //navController.popBackStack()
                 }
             },
             modifier = Modifier

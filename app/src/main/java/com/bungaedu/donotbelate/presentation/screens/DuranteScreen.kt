@@ -1,7 +1,6 @@
 package com.bungaedu.donotbelate.presentation.screens
 
 import android.Manifest
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -12,14 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.bungaedu.donotbelate.data.repository.TimerStateRepository
 import com.bungaedu.donotbelate.navigation.Screen
 import com.bungaedu.donotbelate.presentation.components.NumberPickerComposable
 import com.bungaedu.donotbelate.presentation.components.NotificationPermissionBottomSheet
 import com.bungaedu.donotbelate.presentation.viewmodel.DeviceSettingsViewModel
+import com.bungaedu.donotbelate.presentation.viewmodel.DuranteViewModel
 import com.bungaedu.donotbelate.service.DuranteService
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.koinViewModel
 
 private const val TAG = "*DuranteScreen"
@@ -28,7 +26,7 @@ private const val TAG = "*DuranteScreen"
 fun DuranteScreen(
     navController: NavController,
     deviceSettingsViewModel: DeviceSettingsViewModel = koinViewModel(),
-    repo: TimerStateRepository = get()
+    duranteViewModel: DuranteViewModel = koinViewModel()
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -36,40 +34,11 @@ fun DuranteScreen(
     val context = LocalContext.current
 
     val notificationsAllowed by deviceSettingsViewModel.notificationsAllowed.collectAsState()
-    var avisarCadaMin by remember { mutableIntStateOf(range.first) }
-    var duranteMin by remember { mutableIntStateOf(range.first) }
+    val avisarCadaMin by duranteViewModel.avisarCadaMin.collectAsState()
+    val duranteMin by duranteViewModel.duranteMin.collectAsState()
+    val isRunningService by duranteViewModel.isRunningService.collectAsState()
+
     var isStartingService by remember { mutableStateOf(false) }
-    val isRunningService by repo.isRunningFlow().collectAsState(initial = false)
-
-    // 1) HIDRATA UNA SOLA VEZ desde DataStore (lectura puntual, sin flows)
-    LaunchedEffect(Unit) {
-        repo.getAvisar()?.let { avisarCadaMin = it.coerceIn(range) }
-        repo.getDurante()?.let { duranteMin = it.coerceIn(range) }
-    }
-
-    fun onAvisarChange(v: Int) {
-        val s = v.coerceIn(range)
-        avisarCadaMin = s
-        scope.launch {
-            try {
-                repo.setAvisar(s)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error saving avisarCadaMin: $s", e)
-            }
-        }
-    }
-
-    fun onDuranteChange(v: Int) {
-        val s = v.coerceIn(range)
-        duranteMin = s
-        scope.launch {
-            try {
-                repo.setDurante(s)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error saving duranteMin: $s", e)
-            }
-        }
-    }
 
     // Permission launcher for Android 13+
     val requestNotificationsPermission = rememberLauncherForActivityResult(
@@ -112,7 +81,7 @@ fun DuranteScreen(
             Text("Avisar cada", style = MaterialTheme.typography.headlineMedium)
             NumberPickerComposable(
                 value = avisarCadaMin,
-                onValueChange = ::onAvisarChange,
+                onValueChange = duranteViewModel::onAvisarChange,
                 range = range
             )
             Text("min", style = MaterialTheme.typography.headlineMedium)
@@ -125,7 +94,7 @@ fun DuranteScreen(
             Text("Durante", style = MaterialTheme.typography.headlineMedium)
             NumberPickerComposable(
                 value = duranteMin,
-                onValueChange = ::onDuranteChange,
+                onValueChange = duranteViewModel::onDuranteChange,
                 range = range
             )
             Text("min", style = MaterialTheme.typography.headlineMedium)
@@ -136,10 +105,6 @@ fun DuranteScreen(
                 if (notificationsAllowed) {
                     isStartingService = true
                     scope.launch {
-                        // Defensivo: persiste lo que hay en UI (por si acaso)
-                        repo.setAvisar(avisarCadaMin)
-                        repo.setDurante(duranteMin)
-
                         DuranteService.start(context)
                     }
                 } else {

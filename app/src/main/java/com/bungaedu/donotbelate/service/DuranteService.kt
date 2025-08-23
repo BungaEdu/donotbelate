@@ -31,6 +31,7 @@ class DuranteService : Service() {
         }
 
         fun stop(context: Context) {
+            Log.d(TAG , "Envío señal de stop")
             context.stopService(Intent(context, DuranteService::class.java))
         }
     }
@@ -79,7 +80,6 @@ class DuranteService : Service() {
                 repo.setMinutosRestantes(minutos)
 
                 if (minutos > 0 && minutos % avisarCadaMin == 0) {
-                    Log.i(TAG, "Entro en condicional para speak")
                     NotificationHelper.updateNotification(
                         context = this@DuranteService,
                         title = "Avisar cada $avisarCadaMin min durante $duranteMin min",

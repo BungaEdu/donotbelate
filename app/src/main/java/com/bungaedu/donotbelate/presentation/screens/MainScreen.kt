@@ -35,9 +35,11 @@ fun MainScreen() {
     )
 
     LaunchedEffect(serviceRunning) {
-        Log.d(TAG, "serviceRunning=$serviceRunning")
+        Log.i(TAG, "serviceRunning=$serviceRunning")
         if (serviceRunning && currentRoute != Screen.DuranteRunning.route) {
+            Log.i(TAG, "entro1")
             navController.navigate(Screen.DuranteRunning.route) {
+                Log.i(TAG, "entro2")
                 popUpTo(navController.graph.startDestinationId) { saveState = true }
                 launchSingleTop = true
                 restoreState = true

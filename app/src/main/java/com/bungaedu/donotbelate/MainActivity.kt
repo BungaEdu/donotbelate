@@ -52,13 +52,21 @@ class MainActivity : ComponentActivity() {
                         val runningReal = isServiceRunning(this@MainActivity)
                         Log.d(TAG, "¿Servicio realmente activo?: $runningReal")
 
-                        if (!runningReal && isRunning) {
-                            Log.w(TAG, "⚠️ Corrigiendo isRunning fantasma en DataStore")
-                            repo.setIsRunning(false)
-                        } else {
-                            Log.d(TAG, "Información consistente: estado servicio e info Datastore igual")
+                        when {
+                            !runningReal && isRunning -> {
+                                Log.w(TAG, "⚠️ Corrigiendo isRunning fantasma en DataStore (poner false)")
+                                repo.setIsRunning(false)
+                            }
+                            runningReal && !isRunning -> {
+                                Log.w(TAG, "⚠️ Corrigiendo isRunning faltante en DataStore (poner true)")
+                                repo.setIsRunning(true)
+                            }
+                            else -> {
+                                Log.d(TAG, "✅ Información consistente: estado servicio e info DataStore igual")
+                            }
                         }
                     }
+
 
                     MainScreen()
                 }

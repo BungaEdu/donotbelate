@@ -1,17 +1,58 @@
 package com.bungaedu.donotbelate.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.bungaedu.donotbelate.data.repository.TimerStateRepository
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 private const val TAG = "*DuranteViewModel"
 
 class DuranteViewModel(
-    repo: TimerStateRepository
+    private val repo: TimerStateRepository
 ) : ViewModel() {
+    private val range = 1..59
 
-    // 👀 Observamos directamente DataStore
-    val minutosRestantes: Flow<Int?> = repo.minutosRestantesFlow()
-    val avisarCadaMin: Flow<Int?> = repo.avisarFlow()
-    val duranteMin: Flow<Int?> = repo.duranteFlow()
+    // ✅ Siempre devolvemos un valor no nulo con defaults
+    val minutosRestantes: StateFlow<Int> = repo.minutosRestantesFlow()
+        .map { it ?: 0 }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val avisarCadaMin: StateFlow<Int> = repo.avisarFlow()
+        .map { it ?: 1 } // default 1 min
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
+    val duranteMin: StateFlow<Int> = repo.duranteFlow()
+        .map { it ?: 1 } // default 1 min
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
+
+    val isRunningService: StateFlow<Boolean> = repo.isRunningFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    // 🔄 Cambio de valores (UI -> Repo)
+    fun onAvisarChange(v: Int) {
+        val s = v.coerceIn(range)
+        viewModelScope.launch {
+            try {
+                repo.setAvisar(s)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving avisarCadaMin: $s", e)
+            }
+        }
+    }
+
+    fun onDuranteChange(v: Int) {
+        val s = v.coerceIn(range)
+        viewModelScope.launch {
+            try {
+                repo.setDurante(s)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving duranteMin: $s", e)
+            }
+        }
+    }
 }

@@ -1,0 +1,35 @@
+    /* Para revisar el ciclo de vida, para ver si hay problemas en navegación
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_CREATE -> {
+                    Log.d(TAG, "➡️ onCreate de MainScreen")
+                }
+
+                Lifecycle.Event.ON_RESUME -> {
+                    Log.d(TAG, "➡️ onResume de MainScreen")
+                }
+
+                else -> Unit
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+    LaunchedEffect(Unit) {
+        Log.d(TAG, "➡️ LaunchedEffect (similar a onCreate)")
+    }
+
+    DisposableEffect(Unit) {
+        Log.d(TAG, "➡️ Entró en pantalla (similar a onResume)")
+        onDispose {
+            Log.d(TAG, "➡️ Salió de pantalla (similar a onPause/Destroy)")
+        }
+    }
+*/

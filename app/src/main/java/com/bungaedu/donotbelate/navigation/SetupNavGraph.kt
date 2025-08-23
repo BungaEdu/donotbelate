@@ -22,27 +22,27 @@ fun SetupNavGraph(
         modifier = modifier
     ) {
         composable(Screen.Durante.route) {
-            Log.d(TAG, "Navigated to DuranteScreen")
+            Log.w(TAG, "Navigated to DuranteScreen")
             DuranteScreen(navController)
         }
 
         composable(Screen.Hasta.route) {
-            Log.d(TAG, "Navigated to HastaScreen")
+            Log.w(TAG, "Navigated to HastaScreen")
             HastaScreen(navController)
         }
 
         composable(Screen.Profile.route) {
-            Log.d(TAG, "Navigated to ProfileScreen")
+            Log.w(TAG, "Navigated to ProfileScreen")
             ProfileScreen(navController)
         }
 
         composable(Screen.Settings.route) {
-            Log.d(TAG, "Navigated to SettingsScreen")
+            Log.w(TAG, "Navigated to SettingsScreen")
             SettingsScreen(navController)
         }
 
         composable(route = Screen.DuranteRunning.route) {
-            Log.d(TAG, "Navigated to DuranteRunningScreen")
+            Log.w(TAG, "Navigated to DuranteRunningScreen")
             val duranteViewModel: DuranteViewModel = koinViewModel()
             DuranteRunningScreen(navController, duranteViewModel)
         }

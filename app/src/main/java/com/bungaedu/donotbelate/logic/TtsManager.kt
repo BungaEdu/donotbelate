@@ -117,7 +117,7 @@ class TtsManager() {
                 .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
                 .setLegacyStreamType(AudioManager.STREAM_ALARM)
         } else {
-            Log.i(TAG, "Estoy en outputAlwaysPhone FALSE")
+            //Log.i(TAG, "Estoy en outputAlwaysPhone FALSE")
             builder.setLegacyStreamType(AudioManager.STREAM_MUSIC)
         }
 
@@ -132,7 +132,7 @@ class TtsManager() {
             }
         } else {
             if (focusRequest == AudioManager.AUDIOFOCUS_REQUEST_GRANTED || focusRequest == AudioManager.AUDIOFOCUS_REQUEST_DELAYED || focusRequest == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
-                Log.i(TAG, "Audio focus B: $focusRequest")
+                //Log.i(TAG, "Audio focus B: $focusRequest")
                 val result = textToSpeech?.speak(
                     "¡ATENCIÓN! $textToRead",
                     TextToSpeech.QUEUE_FLUSH,
@@ -158,7 +158,7 @@ class TtsManager() {
         } else if (audioManager != null) {
             audioManager?.abandonAudioFocus(null)
         }
-        Log.i(TAG, "Audio focus abandonado")
+        //Log.i(TAG, "Audio focus abandonado")
     }
 
     fun off() {
