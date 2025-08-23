@@ -21,12 +21,13 @@ class TimerStateDataStoreRepository(
         private val KEY_MINUTOS_RESTANTES = intPreferencesKey("minutos_restantes")
     }
 
+    //////////////////////////////// AVISAR ////////////////////////////////
     override suspend fun getAvisar() =
         dataStore.data.first()[KEY_AVISAR].also { Log.d(TAG, "getAvisar → $it") }
-
-    override suspend fun getDurante() =
-        dataStore.data.first()[KEY_DURANTE].also { Log.d(TAG, "getDurante → $it") }
-
+    override suspend fun setAvisar(v: Int) {
+        Log.d(TAG, "setAvisar = $v")
+        dataStore.edit { it[KEY_AVISAR] = v }
+    }
     override fun avisarFlow() =
         dataStore.data.map { prefs ->
             val v = prefs[KEY_AVISAR]
@@ -34,6 +35,13 @@ class TimerStateDataStoreRepository(
             v
         }
 
+    //////////////////////////////// DURANTE ////////////////////////////////
+    override suspend fun getDurante() =
+        dataStore.data.first()[KEY_DURANTE].also { Log.d(TAG, "getDurante → $it") }
+    override suspend fun setDurante(v: Int) {
+        Log.d(TAG, "setDurante = $v")
+        dataStore.edit { it[KEY_DURANTE] = v }
+    }
     override fun duranteFlow() =
         dataStore.data.map { prefs ->
             val v = prefs[KEY_DURANTE]
@@ -41,16 +49,11 @@ class TimerStateDataStoreRepository(
             v
         }
 
-    override suspend fun setAvisar(v: Int) {
-        Log.d(TAG, "setAvisar = $v")
-        dataStore.edit { it[KEY_AVISAR] = v }
+    //////////////////////////////// RunningService ////////////////////////////////
+    override suspend fun setIsRunning(v: Boolean) {
+        Log.d(TAG, "setIsRunning = $v")
+        dataStore.edit { it[KEY_IS_RUNNING] = v }
     }
-
-    override suspend fun setDurante(v: Int) {
-        Log.d(TAG, "setDurante = $v")
-        dataStore.edit { it[KEY_DURANTE] = v }
-    }
-
     override fun isRunningFlow() =
         dataStore.data.map { prefs ->
             val value = prefs[KEY_IS_RUNNING] ?: false
@@ -58,20 +61,15 @@ class TimerStateDataStoreRepository(
             value
         }
 
+    //////////////////////////////// MinutosRestantes ////////////////////////////////
+    override suspend fun setMinutosRestantes(v: Int) {
+        Log.d(TAG, "setMinutosRestantes = $v")
+        dataStore.edit { it[KEY_MINUTOS_RESTANTES] = v }
+    }
     override fun minutosRestantesFlow() =
         dataStore.data.map { prefs ->
             val value = prefs[KEY_MINUTOS_RESTANTES]
             Log.d(TAG, "minutosRestantesFlow emitió: $value")
             value
         }
-
-    override suspend fun setIsRunning(v: Boolean) {
-        Log.d(TAG, "setIsRunning = $v")
-        dataStore.edit { it[KEY_IS_RUNNING] = v }
-    }
-
-    override suspend fun setMinutosRestantes(v: Int) {
-        Log.d(TAG, "setMinutosRestantes = $v")
-        dataStore.edit { it[KEY_MINUTOS_RESTANTES] = v }
-    }
 }

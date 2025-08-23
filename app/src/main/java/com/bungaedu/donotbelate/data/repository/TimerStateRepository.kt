@@ -3,15 +3,21 @@ package com.bungaedu.donotbelate.data.repository
 import kotlinx.coroutines.flow.Flow
 
 interface TimerStateRepository {
+    //////////////////////////////// AVISAR ////////////////////////////////
     suspend fun getAvisar(): Int?
-    suspend fun getDurante(): Int?
-    fun avisarFlow(): Flow<Int?>
-    fun duranteFlow(): Flow<Int?>
     suspend fun setAvisar(v: Int)
-    suspend fun setDurante(v: Int)
+    fun avisarFlow(): Flow<Int?>
 
-    fun isRunningFlow(): Flow<Boolean>
-    fun minutosRestantesFlow(): Flow<Int?>
+    //////////////////////////////// DURANTE ////////////////////////////////
+    suspend fun getDurante(): Int?
+    suspend fun setDurante(v: Int)
+    fun duranteFlow(): Flow<Int?>
+
+    //////////////////////////////// RunningService ////////////////////////////////
     suspend fun setIsRunning(v: Boolean)
+    fun isRunningFlow(): Flow<Boolean>
+
+    //////////////////////////////// MinutosRestantes ////////////////////////////////
     suspend fun setMinutosRestantes(v: Int)
+    fun minutosRestantesFlow(): Flow<Int?>
 }
