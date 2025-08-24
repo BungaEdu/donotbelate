@@ -13,23 +13,29 @@ import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bungaedu.donotbelate.navigation.Screen
+import com.bungaedu.donotbelate.utils.getVersionCode
+import com.bungaedu.donotbelate.utils.getVersionName
 
 private const val TAG = "*ProfileScreen"
 
 @Composable
 fun ProfileScreen(navController: NavController) {
+    val context = LocalContext.current
+    val versionName = getVersionName(context)
+    val versionCode = getVersionCode(context)
+
     Column(modifier = Modifier.fillMaxSize()) {
         // Header con avatar y nombre
-        Column(
+        /*Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 24.dp),
@@ -45,7 +51,7 @@ fun ProfileScreen(navController: NavController) {
             Text("Edu López", style = MaterialTheme.typography.headlineSmall)
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(32.dp))*/
 
         // Lista de ítems
         HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
@@ -78,6 +84,17 @@ fun ProfileScreen(navController: NavController) {
             icon = Icons.AutoMirrored.Filled.ContactSupport,
             value = "Contacta con nosotros",
             onClick = { /* Editar */ })
+        Spacer(modifier = Modifier.height(32.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "Version: $versionCode")
+        //TODO esta es la correcta
+        //Text(text = "Version: ($versionCode)$versionName")
+        }
+
     }
 }
 
