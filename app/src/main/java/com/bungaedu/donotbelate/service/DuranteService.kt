@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import com.bungaedu.donotbelate.data.repository.TimerStateRepository
 import com.bungaedu.donotbelate.logic.NotificationHelper
 import com.bungaedu.donotbelate.logic.TtsManager
+import com.bungaedu.donotbelate.utils.reportCrash
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 
@@ -79,7 +80,7 @@ class DuranteService : Service() {
             if (ttsManager.isReady()) {
                 ttsManager.speak("Te quedan $duranteMin minutos")
             } else {
-                Log.w(TAG, "TTS no inicializado todavía (inicio)")
+                reportCrash(TAG, "TTS no inicializado todavía (inicio)")
             }
 
             var minutosTranscurridos = 0
@@ -103,7 +104,7 @@ class DuranteService : Service() {
                     if (ttsManager.isReady()) {
                         ttsManager.speak("Te quedan $minutos minutos")
                     } else {
-                        Log.w(TAG, "TTS no inicializado todavía (avisar $minutos)")
+                        reportCrash(TAG, "TTS no inicializado todavía (avisar $minutos)")
                     }
                 }
 

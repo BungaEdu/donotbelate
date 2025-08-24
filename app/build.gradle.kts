@@ -109,4 +109,9 @@ dependencies {
     // (opcional, pero recomendado) – para corrutinas
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+
+    // Firebase BOM (recomiendo usarlo para mantener versiones sincronizadas)
+    implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-crashlytics")
 }
