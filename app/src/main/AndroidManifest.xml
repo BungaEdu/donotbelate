@@ -29,5 +29,9 @@
             android:name=".service.DuranteService"
             android:exported="false"
             android:foregroundServiceType="dataSync|mediaPlayback" />
+        <service
+            android:name=".service.HastaService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync|mediaPlayback" />
     </application>
 </manifest>

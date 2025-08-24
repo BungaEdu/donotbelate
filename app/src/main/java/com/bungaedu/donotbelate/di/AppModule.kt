@@ -11,6 +11,7 @@ import com.bungaedu.donotbelate.data.repository.TimerStateDataStoreRepository
 import com.bungaedu.donotbelate.logic.TtsManager
 import com.bungaedu.donotbelate.presentation.viewmodel.DeviceSettingsViewModel
 import com.bungaedu.donotbelate.presentation.viewmodel.DuranteViewModel
+import com.bungaedu.donotbelate.presentation.viewmodel.HastaViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -32,6 +33,7 @@ val appModule = module {
     single { TtsManager() }
 
     // ✅ ViewModels (ajusta según tu constructor real)
-    viewModel { DuranteViewModel(get()) }        // TimerConfigRepository
+    viewModel { DuranteViewModel(get()) }
+    viewModel { HastaViewModel(get()) }
     viewModel { DeviceSettingsViewModel(get()) }
 }

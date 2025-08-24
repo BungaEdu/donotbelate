@@ -57,7 +57,7 @@ fun DuranteRunningScreen(
             onClick = {
                 Log.d(TAG, "Presiono cerrar")
                 scopeButtonClose.launch {
-                    repo.setIsRunning(false)
+                    repo.setIsRunningServiceDurante(false)
                     DuranteService.stop(context)
                     navController.navigate(Screen.Durante.route) {
                         popUpTo(Screen.DuranteRunning.route) { inclusive = true } // 🔥 elimina la pantalla actual

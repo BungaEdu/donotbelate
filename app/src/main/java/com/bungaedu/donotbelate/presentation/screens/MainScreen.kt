@@ -12,6 +12,7 @@ import com.bungaedu.donotbelate.presentation.components.TopBar
 import com.bungaedu.donotbelate.navigation.SetupNavGraph
 import com.bungaedu.donotbelate.presentation.components.BottomNavigationBar
 import com.bungaedu.donotbelate.presentation.viewmodel.DuranteViewModel
+import com.bungaedu.donotbelate.presentation.viewmodel.HastaViewModel
 import org.koin.androidx.compose.koinViewModel
 
 private const val TAG = "*MainScreen"
@@ -21,8 +22,14 @@ fun MainScreen() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    // ViewModels
     val duranteViewModel: DuranteViewModel = koinViewModel()
-    val isRunningService by duranteViewModel.isRunningService.collectAsState()
+    val hastaViewModel: HastaViewModel = koinViewModel()
+
+    // Estados
+    val isRunningDurante by duranteViewModel.isRunningServiceDurante.collectAsState()
+    val isRunningHasta by hastaViewModel.isRunningServiceHasta.collectAsState()
 
     val showTopBar = currentRoute !in listOf(
         Screen.Settings.route,
@@ -34,9 +41,9 @@ fun MainScreen() {
         Screen.Profile.route
     )
 
-    LaunchedEffect(isRunningService) {
-        Log.i(TAG, "serviceRunning=$isRunningService")
-        if (isRunningService && currentRoute != Screen.DuranteRunning.route) {
+    LaunchedEffect(isRunningDurante) {
+        Log.i(TAG, "serviceRunning=$isRunningDurante")
+        if (isRunningDurante && currentRoute != Screen.DuranteRunning.route) {
             Log.i(TAG, "entro1")
             navController.navigate(Screen.DuranteRunning.route) {
                 Log.i(TAG, "entro2")
@@ -46,6 +53,42 @@ fun MainScreen() {
             }
         }
     }
+
+    LaunchedEffect(isRunningHasta) {
+        Log.i(TAG, "serviceRunning=$isRunningHasta")
+        if (isRunningHasta && currentRoute != Screen.HastaRunning.route) {
+            Log.i(TAG, "entro1")
+            navController.navigate(Screen.HastaRunning.route) {
+                Log.i(TAG, "entro2")
+                popUpTo(navController.graph.startDestinationId) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    }
+
+    /*// 🔄 Navegación automática si algún servicio está corriendo
+    LaunchedEffect(isRunningDurante, isRunningHasta) {
+        Log.i(TAG, "isRunningDurante=$isRunningDurante, isRunningHasta=$isRunningHasta")
+
+        when {
+            isRunningDurante && currentRoute != Screen.DuranteRunning.route -> {
+                navController.navigate(Screen.DuranteRunning.route) {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+
+            isRunningHasta && currentRoute != Screen.HastaRunning.route -> {
+                navController.navigate(Screen.HastaRunning.route) {
+                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        }
+    }*/
 
     Scaffold(
         topBar = {

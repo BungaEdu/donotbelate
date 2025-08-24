@@ -38,7 +38,7 @@ fun DuranteScreen(
     val notificationsAllowed by deviceSettingsViewModel.notificationsAllowed.collectAsState()
     val avisarCadaMin by duranteViewModel.avisarCadaMin.collectAsState()
     val duranteMin by duranteViewModel.duranteMin.collectAsState()
-    val isRunningService by duranteViewModel.isRunningService.collectAsState()
+    val isRunningService by duranteViewModel.isRunningServiceDurante.collectAsState()
 
     // Permission launcher for Android 13+
     val requestNotificationsPermission = rememberLauncherForActivityResult(

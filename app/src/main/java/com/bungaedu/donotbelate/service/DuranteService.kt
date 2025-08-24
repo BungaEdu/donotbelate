@@ -50,13 +50,13 @@ class DuranteService : Service() {
         startForeground(100, initial)
 
         serviceScope.launch {
-            val avisar = repo.getAvisar() ?: 1
+            val avisar = repo.getAvisarDurante() ?: 1
             val durante = repo.getDurante() ?: 1
 
             Log.d(TAG, "Config desde DataStore → avisar=$avisar, durante=$durante")
 
             // Estado inicial en DataStore
-            repo.setIsRunning(true)
+            repo.setIsRunningServiceDurante(true)
 
             // Actualiza notificación real
             NotificationHelper.updateNotification(
@@ -129,7 +129,7 @@ class DuranteService : Service() {
                 minutosTranscurridos++ // Incrementar contador de minutos transcurridos
             }
 
-            repo.setIsRunning(false)
+            repo.setIsRunningServiceDurante(false)
             stopSelf()
         }
     }
@@ -144,7 +144,7 @@ class DuranteService : Service() {
 
         // 3. Limpiar estado en DataStore (ahora con serviceScope)
         serviceScope.launch {
-            repo.setIsRunning(false)
+            repo.setIsRunningServiceDurante(false)
             repo.setMinutosRestantes(0)
         }
     }

@@ -23,4 +23,8 @@ sealed class Screen(
         override val title: String = "Durante (full)"
         override val icon: ImageVector? = null
     }
+    object HastaRunning : Screen("hasta_running") {
+        override val title: String = "Hasta (full)"
+        override val icon: ImageVector? = null
+    }
 }

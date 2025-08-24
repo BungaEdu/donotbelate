@@ -22,7 +22,7 @@ class DuranteViewModel(
         .map { it ?: 0 }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    val avisarCadaMin: StateFlow<Int> = repo.avisarFlow()
+    val avisarCadaMin: StateFlow<Int> = repo.avisarDuranteFlow()
         .map { it ?: 1 } // default 1 min
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
@@ -30,7 +30,7 @@ class DuranteViewModel(
         .map { it ?: 1 } // default 1 min
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1)
 
-    val isRunningService: StateFlow<Boolean> = repo.isRunningFlow()
+    val isRunningServiceDurante: StateFlow<Boolean> = repo.isRunningServiceDuranteFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     // 🔄 Cambio de valores (UI -> Repo)
@@ -38,7 +38,7 @@ class DuranteViewModel(
         val s = v.coerceIn(range)
         viewModelScope.launch {
             try {
-                repo.setAvisar(s)
+                repo.setAvisarDurante(s)
             } catch (e: Exception) {
                 Log.e(TAG, "Error saving avisarCadaMin: $s", e)
             }

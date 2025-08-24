@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.bungaedu.donotbelate.presentation.screens.*
 import com.bungaedu.donotbelate.presentation.viewmodel.DuranteViewModel
+import com.bungaedu.donotbelate.presentation.viewmodel.HastaViewModel
 import org.koin.androidx.compose.koinViewModel
 
 private const val TAG = "*SetupNavGraph"
@@ -45,6 +46,12 @@ fun SetupNavGraph(
             Log.w(TAG, "Navigated to DuranteRunningScreen")
             val duranteViewModel: DuranteViewModel = koinViewModel()
             DuranteRunningScreen(navController, duranteViewModel)
+        }
+
+        composable(route = Screen.HastaRunning.route) {
+            Log.w(TAG, "Navigated to HastaRunningScreen")
+            val hastaViewModel: HastaViewModel = koinViewModel()
+            HastaRunningScreen(navController, hastaViewModel)
         }
     }
 }

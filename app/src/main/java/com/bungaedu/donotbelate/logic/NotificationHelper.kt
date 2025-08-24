@@ -16,8 +16,8 @@ import com.bungaedu.donotbelate.R
 @SuppressLint("MissingPermission") // Recuerda pedir el permiso de notificaciones en Android 13+
 object NotificationHelper {
     private const val TAG = "*NotificationHelper"
-    private const val CHANNEL_ID = "durante_timer_channel"
-    private const val CHANNEL_NAME = "Durante Timer"
+    private const val CHANNEL_ID = "timer_channel"
+    private const val CHANNEL_NAME = "Temporizador"
     private const val CHANNEL_DESCRIPTION = "Avisos periódicos del temporizador"
     private const val TIMER_NOTIFICATION_ID = 100
 

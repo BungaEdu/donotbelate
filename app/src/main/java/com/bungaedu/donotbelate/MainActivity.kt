@@ -1,6 +1,5 @@
 package com.bungaedu.donotbelate
 
-import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.os.Bundle
@@ -45,7 +44,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             setContent {
                 MyAppTheme {
-                    val isRunning by repo.isRunningFlow().collectAsState(initial = false)
+                    val isRunning by repo.isRunningServiceDuranteFlow().collectAsState(initial = false)
 
                     LaunchedEffect(isRunning) {
                         Log.d(TAG, "Servicio corriendo (DataStore): $isRunning")
@@ -55,11 +54,11 @@ class MainActivity : ComponentActivity() {
                         when {
                             !runningReal && isRunning -> {
                                 Log.w(TAG, "⚠️ Corrigiendo isRunning fantasma en DataStore (poner false)")
-                                repo.setIsRunning(false)
+                                repo.setIsRunningServiceDurante(false)
                             }
                             runningReal && !isRunning -> {
                                 Log.w(TAG, "⚠️ Corrigiendo isRunning faltante en DataStore (poner true)")
-                                repo.setIsRunning(true)
+                                repo.setIsRunningServiceDurante(true)
                             }
                             else -> {
                                 Log.d(TAG, "✅ Información consistente: estado servicio e info DataStore igual")
