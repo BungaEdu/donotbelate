@@ -75,18 +75,31 @@ class DuranteService : Service() {
     private fun startTimer(avisarCadaMin: Int, duranteMin: Int) {
         timerJob?.cancel()
         timerJob = serviceScope.launch {
+            // ✅ Aviso inicial (al empezar el temporizador)
+            if (ttsManager.isReady()) {
+                ttsManager.speak("Te quedan $duranteMin minutos")
+            } else {
+                Log.w(TAG, "TTS no inicializado todavía (inicio)")
+            }
+
+            var minutosTranscurridos = 0
+
             for (minutos in duranteMin downTo 0) {
                 // Actualizar StateFlow con minutos restantes
                 repo.setMinutosRestantes(minutos)
 
-                if (minutos > 0 && minutos % avisarCadaMin == 0) {
+                // Actualizar notificación siempre
+                if (minutos > 0) {
                     NotificationHelper.updateNotification(
                         context = this@DuranteService,
                         title = "Avisar cada $avisarCadaMin min durante $duranteMin min",
                         content = "Te quedan $minutos minutos",
                         isOngoing = true
                     )
+                }
 
+                // ✅ Lógica corregida: avisar basándose en minutos transcurridos
+                if (minutos > 0 && minutosTranscurridos > 0 && minutosTranscurridos % avisarCadaMin == 0) {
                     if (ttsManager.isReady()) {
                         ttsManager.speak("Te quedan $minutos minutos")
                     } else {
@@ -94,7 +107,7 @@ class DuranteService : Service() {
                     }
                 }
 
-                // ✅ Solo cuando llega a 0
+                // ✅ Aviso final cuando llega a 0
                 if (minutos == 0) {
                     stopForeground(false)
                     NotificationHelper.updateNotification(
@@ -109,10 +122,13 @@ class DuranteService : Service() {
                     } else {
                         Log.w(TAG, "TTS no inicializado todavía (final)")
                     }
+                    break // Salir del loop cuando termina
                 }
 
-                delay(60_000)
+                delay(60_000) // Esperar 1 minuto
+                minutosTranscurridos++ // Incrementar contador de minutos transcurridos
             }
+
             repo.setIsRunning(false)
             stopSelf()
         }

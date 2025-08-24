@@ -7,12 +7,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.bungaedu.donotbelate.data.repository.TimerStateRepository
 import com.bungaedu.donotbelate.navigation.Screen
 import com.bungaedu.donotbelate.presentation.components.TopBar
 import com.bungaedu.donotbelate.navigation.SetupNavGraph
 import com.bungaedu.donotbelate.presentation.components.BottomNavigationBar
-import org.koin.androidx.compose.get
+import com.bungaedu.donotbelate.presentation.viewmodel.DuranteViewModel
+import org.koin.androidx.compose.koinViewModel
 
 private const val TAG = "*MainScreen"
 
@@ -21,8 +21,8 @@ fun MainScreen() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val repo: TimerStateRepository = get()
-    val serviceRunning by repo.isRunningFlow().collectAsState(initial = false)
+    val duranteViewModel: DuranteViewModel = koinViewModel()
+    val isRunningService by duranteViewModel.isRunningService.collectAsState()
 
     val showTopBar = currentRoute !in listOf(
         Screen.Settings.route,
@@ -34,9 +34,9 @@ fun MainScreen() {
         Screen.Profile.route
     )
 
-    LaunchedEffect(serviceRunning) {
-        Log.i(TAG, "serviceRunning=$serviceRunning")
-        if (serviceRunning && currentRoute != Screen.DuranteRunning.route) {
+    LaunchedEffect(isRunningService) {
+        Log.i(TAG, "serviceRunning=$isRunningService")
+        if (isRunningService && currentRoute != Screen.DuranteRunning.route) {
             Log.i(TAG, "entro1")
             navController.navigate(Screen.DuranteRunning.route) {
                 Log.i(TAG, "entro2")

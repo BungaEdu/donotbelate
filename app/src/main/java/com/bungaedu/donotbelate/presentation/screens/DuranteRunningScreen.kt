@@ -33,13 +33,12 @@ fun DuranteRunningScreen(
     duranteViewModel: DuranteViewModel = viewModel(),
     repo: TimerStateRepository = get()
 ) {
-    // 👀 Los Flow son Int? → hay que poner initial = null
-    val minutosRestantes by duranteViewModel.minutosRestantes.collectAsState(initial = null)
-    val avisarCadaMin by duranteViewModel.avisarCadaMin.collectAsState(initial = null)
-    val duranteMin by duranteViewModel.duranteMin.collectAsState(initial = null)
-
     val context = LocalContext.current
     val scopeButtonClose = rememberCoroutineScope()
+
+    val avisarCadaMin by duranteViewModel.avisarCadaMin.collectAsState(initial = null)
+    val duranteMin by duranteViewModel.duranteMin.collectAsState(initial = null)
+    val minutosRestantes by duranteViewModel.minutosRestantes.collectAsState(initial = null)
 
     // ⬅️ Si se pulsa atrás, se detiene el timer y se cierra la pantalla
     BackHandler {
@@ -60,9 +59,11 @@ fun DuranteRunningScreen(
                 scopeButtonClose.launch {
                     repo.setIsRunning(false)
                     DuranteService.stop(context)
-                    //TODO solucionar el popBackStack, esto es un parche
-                    navController.navigate(Screen.Durante.route)
-                    //navController.popBackStack()
+                    navController.navigate(Screen.Durante.route) {
+                        popUpTo(Screen.DuranteRunning.route) { inclusive = true } // 🔥 elimina la pantalla actual
+                        launchSingleTop = true // evita duplicados si ya existe
+                    }
+
                 }
             },
             modifier = Modifier

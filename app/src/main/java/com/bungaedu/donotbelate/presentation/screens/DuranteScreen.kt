@@ -28,17 +28,17 @@ fun DuranteScreen(
     deviceSettingsViewModel: DeviceSettingsViewModel = koinViewModel(),
     duranteViewModel: DuranteViewModel = koinViewModel()
 ) {
-    var showBottomSheet by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    val range = 1..59
     val context = LocalContext.current
+    val scopeStartService = rememberCoroutineScope()
+    val range = 1..59
+
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var isStartingService by remember { mutableStateOf(false) }
 
     val notificationsAllowed by deviceSettingsViewModel.notificationsAllowed.collectAsState()
     val avisarCadaMin by duranteViewModel.avisarCadaMin.collectAsState()
     val duranteMin by duranteViewModel.duranteMin.collectAsState()
     val isRunningService by duranteViewModel.isRunningService.collectAsState()
-
-    var isStartingService by remember { mutableStateOf(false) }
 
     // Permission launcher for Android 13+
     val requestNotificationsPermission = rememberLauncherForActivityResult(
@@ -104,7 +104,7 @@ fun DuranteScreen(
             onClick = {
                 if (notificationsAllowed) {
                     isStartingService = true
-                    scope.launch {
+                    scopeStartService.launch {
                         DuranteService.start(context)
                     }
                 } else {
