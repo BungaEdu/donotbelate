@@ -116,6 +116,7 @@ fun HastaScreen(
                 if (notificationsAllowed) {
                     isStartingService = true
                     scopeStartService.launch {
+                        hastaViewModel.onHoraObjetivoChange(horaSeleccionada, minutoSeleccionado)
                         HastaService.start(context)
                     }
                 } else {

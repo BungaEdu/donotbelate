@@ -40,12 +40,14 @@ class HastaViewModel(
         }
     }
 
-    fun onHoraObjetivoChange(hora: LocalTime) {
+    fun onHoraObjetivoChange(hora: Int, minuto: Int) {
+        val nuevaHora = LocalTime.of(hora, minuto)
         viewModelScope.launch {
             try {
-                repo.setHoraObjetivo(hora)
+                repo.setHoraObjetivo(nuevaHora)
+                Log.d(TAG, "Hora objetivo guardada: $nuevaHora")
             } catch (e: Exception) {
-                Log.e(TAG, "Error saving horaObjetivo: $hora", e)
+                Log.e(TAG, "Error guardando hora objetivo: $nuevaHora", e)
             }
         }
     }

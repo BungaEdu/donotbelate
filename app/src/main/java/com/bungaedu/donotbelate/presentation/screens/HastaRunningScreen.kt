@@ -24,7 +24,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.koinViewModel
 import java.time.format.DateTimeFormatter
-import kotlin.toString
 
 private const val TAG = "*HastaRunningScreen"
 

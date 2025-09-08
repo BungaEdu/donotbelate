@@ -42,7 +42,7 @@ fun MainScreen() {
     )
 
     LaunchedEffect(isRunningDurante) {
-        Log.i(TAG, "serviceRunning=$isRunningDurante")
+        Log.i(TAG, "Servicio Durante corriendo=$isRunningDurante")
         if (isRunningDurante && currentRoute != Screen.DuranteRunning.route) {
             Log.i(TAG, "entro1")
             navController.navigate(Screen.DuranteRunning.route) {
@@ -55,7 +55,7 @@ fun MainScreen() {
     }
 
     LaunchedEffect(isRunningHasta) {
-        Log.i(TAG, "serviceRunning=$isRunningHasta")
+        Log.i(TAG, "Servicio Hasta corriendo=$isRunningHasta")
         if (isRunningHasta && currentRoute != Screen.HastaRunning.route) {
             Log.i(TAG, "entro1")
             navController.navigate(Screen.HastaRunning.route) {

@@ -15,7 +15,7 @@ class TimerStateDataStoreRepository(
 ) : TimerStateRepository {
 
     companion object {
-        private const val TAG = "*TimerPrefsRepo"
+        private const val TAG = "*TimerStateDataStoreRepository"
 
         // AVISAR
         private val KEY_AVISAR_DURANTE = intPreferencesKey("avisar_durante")

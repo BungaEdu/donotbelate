@@ -62,13 +62,13 @@ class HastaService : Service() {
 
             // Actualiza notificación real
             val horaStr = horaObjetivo.format(DateTimeFormatter.ofPattern("HH:mm"))
-            val minutosRestantes =
-                ChronoUnit.MINUTES.between(LocalTime.now(), horaObjetivo).toInt()
+            /*val minutosRestantes =
+                ChronoUnit.MINUTES.between(LocalTime.now(), horaObjetivo).toInt()*/
 
             NotificationHelper.updateNotification(
                 context = this@HastaService,
                 title = "Avisar cada $avisar min hasta las $horaStr",
-                content = "Te quedan $minutosRestantes minutos",
+                content = "",
                 isOngoing = true
             )
 
@@ -81,9 +81,19 @@ class HastaService : Service() {
     private fun startTimer(avisarCadaMin: Int, horaObjetivo: LocalTime) {
         timerJob?.cancel()
         timerJob = serviceScope.launch {
+
+            // Mensaje inicial
+            if (ttsManager.isReady()) {
+                ttsManager.speak("Te avisaré cada $avisarCadaMin minutos hasta las $horaObjetivo")
+            } else {
+                Log.w(TAG, "TTS no inicializado todavía (mensaje inicial)")
+            }
+
+            // Calcular la próxima hora de aviso (hora actual + avisarCadaMin)
+            var proximoAviso = LocalTime.now().plusMinutes(avisarCadaMin.toLong())
+
             while (LocalTime.now().isBefore(horaObjetivo)) {
-                val minutosRestantes =
-                    ChronoUnit.MINUTES.between(LocalTime.now(), horaObjetivo).toInt()
+                val minutosRestantes = ChronoUnit.MINUTES.between(LocalTime.now(), horaObjetivo).toInt()
                 repo.setMinutosRestantes(minutosRestantes)
 
                 NotificationHelper.updateNotification(
@@ -93,39 +103,61 @@ class HastaService : Service() {
                     isOngoing = true
                 )
 
-                if (minutosRestantes % avisarCadaMin == 0 && minutosRestantes > 0) {
+                // Verificar si hemos llegado a la hora de aviso
+                val ahora = LocalTime.now()
+                if (!ahora.isBefore(proximoAviso) && ahora.isBefore(horaObjetivo)) {
                     if (ttsManager.isReady()) {
-                        ttsManager.speak("Te quedan $minutosRestantes minutos")
+                        ttsManager.speak("Son las ${ahora.hour.toString().padStart(2, '0')}:${ahora.minute.toString().padStart(2, '0')}")
                     } else {
-                        Log.w(TAG, "TTS no inicializado todavía (avisar $minutosRestantes)")
+                        Log.w(TAG, "TTS no inicializado todavía (aviso horario)")
                     }
+
+                    // Calcular el siguiente aviso
+                    proximoAviso = proximoAviso.plusMinutes(avisarCadaMin.toLong())
                 }
 
-                delay(60_000)
+                delay(60_000) // Esperar 1 minuto
             }
 
-            repo.setIsRunningServiceHasta(false)
-            NotificationHelper.updateNotification(
-                this@HastaService,
-                "Hora alcanzada",
-                "Ya son las $horaObjetivo, no llegues tarde",
-                isOngoing = false
-            )
-            if (ttsManager.isReady()) {
-                ttsManager.speak("Ya son las $horaObjetivo, no llegues tarde")
+            // Cuando se alcanza la hora objetivo
+            if (!LocalTime.now().isBefore(horaObjetivo)) {
+                NotificationHelper.updateNotification(
+                    this@HastaService,
+                    "Hora alcanzada",
+                    "Ya son las $horaObjetivo, no llegues tarde",
+                    isOngoing = false
+                )
+
+                if (ttsManager.isReady()) {
+                    ttsManager.speak("Ya son las $horaObjetivo, no llegues tarde")
+                } else {
+                    Log.w(TAG, "TTS no inicializado todavía (mensaje final)")
+                }
+
+                stopSelf()
             }
-            stopSelf()
+        }
+    }
+
+    private fun cleanup() {
+        // 1. Cancelar el timer job
+        timerJob?.cancel()
+        timerJob = null
+
+        // 2. Cancelar todas las notificaciones
+        NotificationHelper.cancelAll(this)
+
+        // 3. Limpiar estado en DataStore (ahora con serviceScope)
+        serviceScope.launch {
+            repo.setIsRunningServiceDurante(false)
+            repo.setMinutosRestantes(0)
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        timerJob?.cancel()
-        serviceScope.cancel()
-        serviceScope.launch {
-            repo.setIsRunningServiceHasta(false)
-            repo.setMinutosRestantes(0)
-        }
+        cleanup()
+        serviceScope.cancel() // Cancelar el scope al final
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
