@@ -149,7 +149,7 @@ class HastaService : Service() {
 
         // 3. Limpiar estado en DataStore (ahora con serviceScope)
         serviceScope.launch {
-            repo.setIsRunningServiceDurante(false)
+            repo.setIsRunningServiceHasta(false)
             repo.setMinutosRestantes(0)
         }
     }
