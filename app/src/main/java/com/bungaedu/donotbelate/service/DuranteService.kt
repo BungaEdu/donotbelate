@@ -32,7 +32,7 @@ class DuranteService : Service() {
         }
 
         fun stop(context: Context) {
-            Log.d(TAG , "Envío señal de stop")
+            Log.d(TAG, "Envío señal de stop")
             context.stopService(Intent(context, DuranteService::class.java))
         }
     }
@@ -76,46 +76,54 @@ class DuranteService : Service() {
     private fun startTimer(avisarCadaMin: Int, duranteMin: Int) {
         timerJob?.cancel()
         timerJob = serviceScope.launch {
-            // ✅ Aviso inicial (al empezar el temporizador)
+            val inicio = System.currentTimeMillis()
+            val fin = inicio + duranteMin * 60_000L
+
+            // ✅ Aviso inicial y estado inicial
+            repo.setMinutosRestantes(duranteMin)
             if (ttsManager.isReady()) {
                 ttsManager.speak("Te quedan $duranteMin minutos")
             } else {
                 reportCrash(TAG, "TTS no inicializado todavía (inicio)")
             }
 
-            var minutosTranscurridos = 0
+            for (i in (duranteMin - 1) downTo 0) {
+                val proximo = inicio + (duranteMin - i) * 60_000L
+                val delayMs = proximo - System.currentTimeMillis()
 
-            for (minutos in duranteMin downTo 0) {
-                // Actualizar StateFlow con minutos restantes
-                repo.setMinutosRestantes(minutos)
+                if (delayMs > 0) delay(delayMs) // 🔹 Esperar hasta el momento exacto
 
-                // Actualizar notificación siempre
-                if (minutos > 0) {
+                // Actualizar minutos restantes
+                repo.setMinutosRestantes(i)
+                if (i > 0) {
                     NotificationHelper.updateNotification(
                         context = this@DuranteService,
                         title = "Avisar cada $avisarCadaMin min durante $duranteMin min",
-                        content = "Te quedan $minutos minutos",
+                        content = "Te quedan $i minutos",
                         isOngoing = true
                     )
                 }
 
-                // ✅ Lógica corregida: avisar basándose en minutos transcurridos
-                if (minutos > 0 && minutosTranscurridos > 0 && minutosTranscurridos % avisarCadaMin == 0) {
+                // Aviso intermedio si toca
+                val transcurridos = duranteMin - i
+                if (i > 0 && transcurridos % avisarCadaMin == 0) {
                     if (ttsManager.isReady()) {
-                        ttsManager.speak("Te quedan $minutos minutos")
+                        ttsManager.speak("Te quedan $i minutos")
                     } else {
-                        reportCrash(TAG, "TTS no inicializado todavía (avisar $minutos)")
+                        reportCrash(TAG, "TTS no inicializado todavía (avisar $i)")
                     }
                 }
 
-                // ✅ Aviso final cuando llega a 0
-                if (minutos == 0) {
-                    stopForeground(false)
-                    NotificationHelper.updateNotification(
+                // Aviso final
+                if (i == 0) {
+                    // Quita la notificación foreground
+                    stopForeground(true)
+
+                    // Crea una notificación normal que se queda en la bandeja
+                    NotificationHelper.showFinalNotification(
                         context = this@DuranteService,
                         title = "Temporizador finalizado",
-                        content = "Se ha acabado el tiempo, no llegues tarde",
-                        isOngoing = false
+                        content = "Se ha acabado el tiempo, no llegues tarde"
                     )
 
                     if (ttsManager.isReady()) {
@@ -123,11 +131,8 @@ class DuranteService : Service() {
                     } else {
                         Log.w(TAG, "TTS no inicializado todavía (final)")
                     }
-                    break // Salir del loop cuando termina
                 }
 
-                delay(60_000) // Esperar 1 minuto
-                minutosTranscurridos++ // Incrementar contador de minutos transcurridos
             }
 
             repo.setIsRunningServiceDurante(false)
@@ -140,8 +145,8 @@ class DuranteService : Service() {
         timerJob?.cancel()
         timerJob = null
 
-        // 2. Cancelar todas las notificaciones
-        NotificationHelper.cancelAll(this)
+        // 2. Cancelar solo la notificación ongoing, no la final
+        NotificationHelper.cancelOngoing(this)
 
         // 3. Limpiar estado en DataStore (ahora con serviceScope)
         serviceScope.launch {

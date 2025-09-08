@@ -20,6 +20,7 @@ object NotificationHelper {
     private const val CHANNEL_NAME = "Temporizador"
     private const val CHANNEL_DESCRIPTION = "Avisos periódicos del temporizador"
     private const val TIMER_NOTIFICATION_ID = 100
+    private const val FINAL_NOTIFICATION_ID = 999
 
     fun createNotificationChannel(context: Context) {
         val channel = NotificationChannel(
@@ -110,6 +111,24 @@ object NotificationHelper {
     ) {
         val n = buildNotification(context, title, content, isOngoing)
         NotificationManagerCompat.from(context).notify(TIMER_NOTIFICATION_ID, n)
+    }
+
+    fun showFinalNotification(context: Context, title: String, content: String) {
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setSmallIcon(R.mipmap.ic_launcher_foreground)
+            .setAutoCancel(true) // el usuario la puede quitar manualmente
+            .build()
+
+        NotificationManagerCompat.from(context).notify(FINAL_NOTIFICATION_ID, notification)
+    }
+
+    /**
+     * Cancela solo la notificación en curso (foreground).
+     */
+    fun cancelOngoing(context: Context) {
+        NotificationManagerCompat.from(context).cancel(TIMER_NOTIFICATION_ID)
     }
 
     /**
