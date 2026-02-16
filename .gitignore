@@ -13,3 +13,22 @@
 .externalNativeBuild
 .cxx
 local.properties
+# === Android / Gradle ===
+.gradle/
+**/build/
+
+# === Outputs de release ===
+app/release/
+app/build/outputs/
+
+# === Keystores (NUNCA versionar) ===
+*.jks
+*.keystore
+upload-key.jks
+
+# === Android Studio / IntelliJ ===
+.idea/
+
+# === Logs y temporales ===
+*.log
+tmp/
